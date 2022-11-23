@@ -1,0 +1,26 @@
+audio[id*="_player"] {
+    display:none;
+}
+.playbutton {
+    cursor:pointer;
+    display: inline;
+    height: 1.6ex;
+}
+
+li a.Sentence{
+ text-decoration: none;
+ display: inline;
+ color:  DarkRed;
+}
+
+li a.Wordform{
+   color:  midnightblue;
+}
+
+li a.Morph{
+  color: darkgreen;
+}
+
+li a.Morphset{
+  color: darkgreen;
+}
