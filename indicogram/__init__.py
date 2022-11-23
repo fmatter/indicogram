@@ -43,6 +43,20 @@ def render_lfts(req, objid, table, session, **kwargs):
         md_str += f" ‘{', '.join(meanings)}’"
     return md_str
 
+def render_lex(req, objid, table, session, **kwargs):
+    unit = session.query(Lexeme).filter(Lexeme.id == objid).first()
+    url = req.route_url("lexeme", id=objid, **kwargs)
+    with_translation = "no_translation" not in kwargs
+    md_str = f"<span class='smallcaps'>[{unit.name}]({url})</span>"
+    if with_translation:
+        meanings = [
+            decorate_gloss_string(
+                x, decoration=lambda x: f"<span class='smallcaps'>{x}</span>"
+            )
+            for x in [unit.description]
+        ]
+        md_str += f" ‘{', '.join(meanings)}’"
+    return md_str
 
 def main(global_config, **settings):
     """This function returns a Pyramid WSGI application."""
@@ -73,6 +87,7 @@ def main(global_config, **settings):
         "renderer_map": {
             "MorphsetTable": render_lfts,
             "FormTable": render_lfts,
+            "LexemeTable": render_lex,
         },
         "extensions": [],
     }
