@@ -104,6 +104,17 @@ def get_license_data(license_tag, small=False):
                 license_dict["license_icon"] = icon + ".png"
     return license_dict
 
+tag_dic = {}
+
+def tag_slug(tag):
+    if tag not in tag_dic:
+        tagslug = slugify(tag)
+        suff = 1
+        while f"{tagslug}-{suff}" in tag_dic.values():
+            suff += 1
+        tag_dic[tag] = f"{tagslug}-{suff}"
+    return tag_dic[tag]
+
 
 def main(args):
 
@@ -298,7 +309,8 @@ def main(args):
     if check_table("TextTable"):
         log.info("Texts")
         for text in cldf.iter_rows("TextTable"):
-            data.add(
+            tags = text["Metadata"].pop("tags", [])
+            new_text = data.add(
                 Text,
                 text["ID"],
                 id=text["ID"],
@@ -306,6 +318,10 @@ def main(args):
                 description=text["Description"],
                 text_metadata=text["Metadata"],
             )
+            for tag in tags:
+                if tag not in data["Tag"]:
+                    data.add(Tag, tag, id=tag, name=tag)
+                    data.add(TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text)
 
     if check_table("SpeakerTable"):
         log.info("Speakers")
@@ -328,6 +344,15 @@ def main(args):
                 language=data["Language"][ex["Language_ID"]],
                 comment=ex["Comment"],
             )
+            for tag in set(ex["Tags"]):
+                if not tag:
+                    continue
+                slug = tag_slug(tag)
+                if slug not in data["Tag"]:
+                    data.add(Tag, slug, id=slug, name=tag)
+                data.add(
+                    SentenceTag, ex["ID"] + slug, tag=data["Tag"][slug], sentence=new_ex
+                )
             if check_table("SpeakerTable"):
                 data.add(
                     SpeakerSentence,
@@ -375,6 +400,68 @@ def main(args):
                     sf["Form_ID"] + "-" + sf["Parameter_ID"]
                 ],
             )
+
+    log.info("Lexemes")
+    for lex in cldf.iter_rows("LexemeTable"):
+        new_lex = data.add(
+            Lexeme,
+            lex["ID"],
+            id=lex["ID"],
+            name=lex["Name"],
+            description=lex["Description"],
+            language=data["Language"][lex["Language_ID"]],
+            comment=lex["Comment"],
+        )
+        if lex["ID"] in data["Morpheme"]:
+            new_lex.root_morpheme = data["Morpheme"][lex["ID"]]
+
+    for lexlex in cldf.iter_rows("LexemeLexemeParts"):
+        data.add(
+            LexemeLexemePart,
+            lexlex["ID"],
+            base_lexeme=data["Lexeme"][lexlex["Base_ID"]],
+            derived_lexeme=data["Lexeme"][lexlex["Lexeme_ID"]],
+        )
+
+    for lexmorph in cldf.iter_rows("LexemeMorphemeParts"):
+        data.add(
+            LexemeMorphemePart,
+            lexmorph["ID"],
+            morpheme=data["Morpheme"][lexmorph["Morpheme_ID"]],
+            lexeme=data["Lexeme"][lexmorph["Lexeme_ID"]],
+        )
+
+    log.info("Inflected forms")
+    for form in cldf.iter_rows("InflectionTable"):
+        data.add(
+            Inflection,
+            form["ID"],
+            lexeme=data["Lexeme"][form["Lexeme_ID"]],
+            form=data["Wordform"][form["Form_ID"]],
+        )
+
+    # log.info("Audio")
+    # for audio in ds.iter_rows("MediaTable"):
+    #     if audio["ID"] in data["Sentence"]:
+    #         sentence_file = common.Sentence_files(
+    #             object_pk=data["Sentence"][audio["ID"]].pk,
+    #             name="%s" % audio["ID"],
+    #             id="%s" % audio["ID"],
+    #             mime_type="audio/wav",
+    #         )
+    #         DBSession.add(sentence_file)
+    #         DBSession.flush()
+    #         DBSession.refresh(sentence_file)
+    #     elif audio["ID"] in data["Wordform"]:
+    #         form_file = Wordform_files(
+    #             object_pk=data["Wordform"][audio["ID"]].pk,
+    #             name=audio["Name"],
+    #             id=audio["ID"],
+    #             mime_type="audio/wav",
+    #         )
+    #         DBSession.add(form_file)
+    #         DBSession.flush()
+    #         DBSession.refresh(form_file)
 
     if check_table("ChapterTable"):
         log.info("Documents")
