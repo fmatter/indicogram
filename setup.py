@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="indicogram",
-    version="0.0.4.dev",
+    version="0.0.1",
     description="indicogram",
     classifiers=[
         "Programming Language :: Python",
