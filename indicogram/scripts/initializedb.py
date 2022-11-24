@@ -117,7 +117,7 @@ def main(args):
     demo_data = []
     data = Data()
     if "http" in cldf.properties["dc:identifier"]:
-        domain=cldf.properties.get("dc:identifier").split("://")[1],
+        domain=cldf.properties.get("dc:identifier").split("://")[1]
     else:
         domain="example.org/"
 
