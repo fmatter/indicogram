@@ -9,36 +9,20 @@ from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
-from clld_corpus_plugin.models import (
-    SentenceSlice,
-    SentenceTag,
-    Speaker,
-    SpeakerSentence,
-    Tag,
-    Text,
-    TextSentence,
-    TextTag,
-)
+from clld_corpus_plugin.models import (SentenceSlice, SentenceTag, Speaker,
+                                       SpeakerSentence, Tag, Text,
+                                       TextSentence, TextTag)
 from clld_document_plugin.models import Document
-from clld_morphology_plugin.models import (
-    POS,
-    FormMeaning,
-    FormSlice,
-    Inflection,
-    Lexeme,
-    LexemeLexemePart,
-    LexemeMorphemePart,
-    Meaning,
-    Morph,
-    Morpheme,
-    MorphemeMeaning,
-    Wordform,
-    Wordform_files,
-)
+from clld_morphology_plugin.models import (POS, FormMeaning, FormSlice,
+                                           Inflection, Lexeme,
+                                           LexemeLexemePart,
+                                           LexemeMorphemePart, Meaning, Morph,
+                                           Morpheme, MorphemeMeaning, Wordform,
+                                           Wordform_files)
+from clldutils import licenses
 from clldutils.color import qualitative_colors
 from clldutils.misc import nfilter
 from pycldf import Sources
-from clldutils import licenses
 
 csv.field_size_limit(sys.maxsize)
 
@@ -64,17 +48,6 @@ def listify(obj):
         return [obj]
     return obj
 
-
-# license_dic = {
-#     "creativecommons.org/licenses/by/4.0": {
-#         "license_icon": "cc-by.png",
-#         "license_name": "Creative Commons Attribution 4.0 International License",
-#     },
-#     "creativecommons.org/licenses/by-sa/4.0": {
-#         "license_icon": "cc-by-sa.png",
-#         "license_name": "Creative Commons Attribution-ShareAlike 4.0 International",
-#     },
-# }
 
 cc_icons = [
     "cc-by-nc-nd",
@@ -342,7 +315,7 @@ def main(args):
                     sentence=new_ex,
                     text=data["Text"][ex["Text_ID"]],
                     record_number=ex["Record_Number"],
-                    phrase_number=ex.get("Phrase_Number", None)
+                    phrase_number=ex.get("Phrase_Number", None),
                 )
             elif len(ex.get("Source", [])) > 0:
                 bibkey, pages = Sources.parse(ex["Source"][0])
