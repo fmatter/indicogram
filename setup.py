@@ -20,9 +20,13 @@ setup(
     zip_safe=False,
     install_requires=[
         "clld>=9.0.0",
+        "clld_corpus_plugin>=0.0.6",
+        "clld_document_plugin>=0.0.3",
+        "clld_morphology_plugin>=0.0.7",
+        "waitress>=2.1.2"
     ],
     extras_require={
-        "dev": ["flake8", "waitress"],
+        "dev": ["flake8"],
         "test": [
             "mock",
             "pytest>=5.4",

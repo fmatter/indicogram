@@ -1,6 +1,4 @@
-import collections
 import csv
-import itertools
 import logging
 import sys
 
@@ -20,9 +18,10 @@ from clld_morphology_plugin.models import (POS, FormMeaning, FormSlice,
                                            Morpheme, MorphemeMeaning, Wordform,
                                            Wordform_files)
 from clldutils import licenses
-from clldutils.color import qualitative_colors
-from clldutils.misc import nfilter
 from pycldf import Sources
+
+import indicogram
+from indicogram import models
 
 csv.field_size_limit(sys.maxsize)
 
@@ -34,13 +33,7 @@ log = logging.getLogger(__name__)
 log.propagate = False
 log.addHandler(handler)
 
-from pathlib import Path
 
-import pandas as pd
-from slugify import slugify
-
-import indicogram
-from indicogram import models
 
 
 def listify(obj):
