@@ -1,7 +1,8 @@
 from clld_corpus_plugin.models import Text
 from clld_document_plugin import decorate_gloss_string
 from clld_markdown_plugin import comma_and_list
-from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
+from clld_morphology_plugin.models import (POS, Lexeme, Morph, Morpheme,
+                                           Wordform)
 from pyramid.config import Configurator
 
 from indicogram import interfaces, models
