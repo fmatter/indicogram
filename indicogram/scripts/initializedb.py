@@ -116,6 +116,11 @@ def main(args):
 
     demo_data = []
     data = Data()
+    if "http" in cldf.properties["dc:identifier"]:
+        domain=cldf.properties.get("dc:identifier").split("://")[1],
+    else:
+        domain="example.org/"
+
     dataset = data.add(
         common.Dataset,
         indicogram.__name__,
@@ -123,7 +128,7 @@ def main(args):
         name=cldf.properties[
             "dc:title"
         ],  # all the dc:X data should be in your CLDF dataset
-        domain=cldf.properties.get("dc:identifier", "://none").split("://")[1],
+        domain=domain,
         license=cldf.properties["dc:license"],
         jsondata=get_license_data(cldf.properties["dc:license"], small=False),
         publisher_name="",
