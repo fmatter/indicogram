@@ -124,6 +124,9 @@ def main(args):
             if dataset.contact is None and contributor["Email"] is not None:
                 dataset.contact = contributor["Email"]
 
+            jsondata = {}
+            if "Orcid" in contributor:
+                jsondata["orcid"] = contributor["Orcid"]
             new_cont = data.add(
                 common.Contributor,
                 contributor["ID"],
@@ -131,6 +134,7 @@ def main(args):
                 name=contributor["Name"],
                 email=contributor["Email"],
                 url=contributor["Url"],
+                jsondata=jsondata
             )
             dataset.editors.append(
                 common.Editor(
