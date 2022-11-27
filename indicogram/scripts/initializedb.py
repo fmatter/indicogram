@@ -54,6 +54,8 @@ cc_icons = [
 
 
 def get_license_data(license_tag, small=False):
+    if license_tag == None:
+        return {}
     license = licenses.find(license_tag)
     if not license:
         log.warning(f'Could not interpret license "{license_tag}"')
@@ -98,7 +100,7 @@ def main(args):
 
     demo_data = []
     data = Data()
-    if "http" in cldf.properties["dc:identifier"]:
+    if "http" in cldf.properties.get("dc:identifier", ""):
         domain=cldf.properties.get("dc:identifier").split("://")[1]
     else:
         domain="example.org/"
@@ -107,12 +109,12 @@ def main(args):
         common.Dataset,
         indicogram.__name__,
         id=indicogram.__name__,
-        name=cldf.properties[
-            "dc:title"
-        ],  # all the dc:X data should be in your CLDF dataset
+        name=cldf.properties.get(
+            "dc:title", "Unnamed dataset"
+        ),  # all the dc:X data should be in your CLDF dataset
         domain=domain,
-        license=cldf.properties["dc:license"],
-        jsondata=get_license_data(cldf.properties["dc:license"], small=False),
+        license=cldf.properties.get("dc:license", None),
+        jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False),
         publisher_name="",
         publisher_place="",
         publisher_url="",
