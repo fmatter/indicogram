@@ -13,12 +13,13 @@ The only components provided by the app itself are:
 * some [configuration](indicogram/__init__.py) for `clld-markdown-plugin`
 
 The app, including the default [database initialization script](indicogram/scripts/initializedb.py) is designed to be compatible with CLDF datasets created from [FLEx](https://software.sil.org/fieldworks/) with [cldflex](https://github.com/fmatter/cldflex) and with [pylingdocs](https://pylingdocs.readthedocs.io)-generated markdown.
-Here's [a step-by-step tutorial](https://github.com/fmatter/flex-grammar-tutorial) for FLEx > CLDF > pylingdocs > CLLD
+
+There's [a step-by-step tutorial](https://github.com/fmatter/flex-grammar-tutorial) for FLEx > CLDF > pylingdocs > CLLD.
 
 Setup:
 
-1. Fork, clone, or download
-2. Create a virtual environment (suggested)
+1. fork, clone, or download
+2. create a virtual environment (suggested)
 3. `pip install -e .[dev]`
 4. `clld initdb development.ini --cldf /path/to/your/cldf/metadata.json`
 5. `pserve development.ini`
