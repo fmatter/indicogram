@@ -246,7 +246,7 @@ def main(args):
                     form=new_form,
                     meaning=data["Meaning"][meaning],
                 )
-        demo_data.append(f"[](FormTable#cldf:{new_form.id}) is a nice word.")
+        demo_data.append(f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms.")
 
     if check_table("FormSlices"):
         log.info("Form slices")
@@ -330,7 +330,7 @@ def main(args):
                     )
                 )
         demo_data.append(
-            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, it's all there for you to use.\n[](ExampleTable#cldf:{new_ex.id})"""
+            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
         )
 
     if check_table("ExampleSlices"):
