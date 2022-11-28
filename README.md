@@ -2,7 +2,7 @@
 
 Interactive digital corpus-based grammar.
 
-![License](https://img.shields.io/github/license/fmatter/pyradigms)
+![License](https://img.shields.io/github/license/fmatter/indicogram)
 
 This is a [CLLD](https://clld.org/) app serving a digital grammar, combining a corpus with descriptive prose.
 The heavy lifting is done by these plugins:
