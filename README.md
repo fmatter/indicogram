@@ -1,4 +1,9 @@
-# InDiCoGram[^1]
+# InDiCoGram
+
+Interactive digital corpus-based grammar.
+
+![License](https://img.shields.io/github/license/fmatter/pyradigms)
+
 This is a [CLLD](https://clld.org/) app serving a digital grammar, combining a corpus with descriptive prose.
 The heavy lifting is done by these plugins:
 
@@ -23,6 +28,3 @@ Setup:
 3. `pip install -e .[dev]`
 4. `clld initdb development.ini --cldf /path/to/your/cldf/metadata.json`
 5. `pserve development.ini`
-
-
-[^1]: Interactive digital corpus-based grammar
