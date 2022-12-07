@@ -1,6 +1,4 @@
-import collections
 import csv
-import itertools
 import logging
 import sys
 
@@ -20,9 +18,10 @@ from clld_morphology_plugin.models import (POS, FormMeaning, FormSlice,
                                            Morpheme, MorphemeMeaning, Wordform,
                                            Wordform_files)
 from clldutils import licenses
-from clldutils.color import qualitative_colors
-from clldutils.misc import nfilter
 from pycldf import Sources
+
+import indicogram
+from indicogram import models
 
 csv.field_size_limit(sys.maxsize)
 
@@ -34,13 +33,7 @@ log = logging.getLogger(__name__)
 log.propagate = False
 log.addHandler(handler)
 
-from pathlib import Path
 
-import pandas as pd
-from slugify import slugify
-
-import indicogram
-from indicogram import models
 
 
 def listify(obj):
@@ -61,6 +54,8 @@ cc_icons = [
 
 
 def get_license_data(license_tag, small=False):
+    if license_tag == None:
+        return {}
     license = licenses.find(license_tag)
     if not license:
         log.warning(f'Could not interpret license "{license_tag}"')
@@ -116,7 +111,7 @@ def main(args):
 
     demo_data = []
     data = Data()
-    if "http" in cldf.properties["dc:identifier"]:
+    if "http" in cldf.properties.get("dc:identifier", ""):
         domain=cldf.properties.get("dc:identifier").split("://")[1]
     else:
         domain="example.org/"
@@ -125,12 +120,12 @@ def main(args):
         common.Dataset,
         indicogram.__name__,
         id=indicogram.__name__,
-        name=cldf.properties[
-            "dc:title"
-        ],  # all the dc:X data should be in your CLDF dataset
+        name=cldf.properties.get(
+            "dc:title", "Unnamed dataset"
+        ),  # all the dc:X data should be in your CLDF dataset
         domain=domain,
-        license=cldf.properties["dc:license"],
-        jsondata=get_license_data(cldf.properties["dc:license"], small=False),
+        license=cldf.properties.get("dc:license", None),
+        jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False),
         publisher_name="",
         publisher_place="",
         publisher_url="",
@@ -142,6 +137,9 @@ def main(args):
             if dataset.contact is None and contributor["Email"] is not None:
                 dataset.contact = contributor["Email"]
 
+            jsondata = {}
+            if "Orcid" in contributor:
+                jsondata["orcid"] = contributor["Orcid"]
             new_cont = data.add(
                 common.Contributor,
                 contributor["ID"],
@@ -149,6 +147,7 @@ def main(args):
                 name=contributor["Name"],
                 email=contributor["Email"],
                 url=contributor["Url"],
+                jsondata=jsondata
             )
             dataset.editors.append(
                 common.Editor(
@@ -258,7 +257,7 @@ def main(args):
                     form=new_form,
                     meaning=data["Meaning"][meaning],
                 )
-        demo_data.append(f"[](FormTable#cldf:{new_form.id}) is a nice word.")
+        demo_data.append(f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms.")
 
     if check_table("FormSlices"):
         log.info("Form slices")
@@ -356,7 +355,7 @@ def main(args):
                     )
                 )
         demo_data.append(
-            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, it's all there for you to use.\n[](ExampleTable#cldf:{new_ex.id})"""
+            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
         )
 
     if check_table("ExampleSlices"):
