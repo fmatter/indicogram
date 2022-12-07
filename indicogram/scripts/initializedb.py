@@ -22,6 +22,7 @@ from pycldf import Sources
 
 import indicogram
 from indicogram import models
+from slugify import slugify
 
 csv.field_size_limit(sys.maxsize)
 
