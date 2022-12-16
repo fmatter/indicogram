@@ -418,28 +418,28 @@ def main(args):
             form=data["Wordform"][form["Form_ID"]],
         )
 
-    # log.info("Audio")
-    # for audio in ds.iter_rows("MediaTable"):
-    #     if audio["ID"] in data["Sentence"]:
-    #         sentence_file = common.Sentence_files(
-    #             object_pk=data["Sentence"][audio["ID"]].pk,
-    #             name="%s" % audio["ID"],
-    #             id="%s" % audio["ID"],
-    #             mime_type="audio/wav",
-    #         )
-    #         DBSession.add(sentence_file)
-    #         DBSession.flush()
-    #         DBSession.refresh(sentence_file)
-    #     elif audio["ID"] in data["Wordform"]:
-    #         form_file = Wordform_files(
-    #             object_pk=data["Wordform"][audio["ID"]].pk,
-    #             name=audio["Name"],
-    #             id=audio["ID"],
-    #             mime_type="audio/wav",
-    #         )
-    #         DBSession.add(form_file)
-    #         DBSession.flush()
-    #         DBSession.refresh(form_file)
+    log.info("Audio")
+    for audio in cldf.iter_rows("MediaTable"):
+        if audio["ID"] in data["Sentence"]:
+            sentence_file = common.Sentence_files(
+                object_pk=data["Sentence"][audio["ID"]].pk,
+                name="%s" % audio["ID"],
+                id="%s" % audio["ID"],
+                mime_type="audio/wav",
+            )
+            DBSession.add(sentence_file)
+            DBSession.flush()
+            DBSession.refresh(sentence_file)
+        elif audio["ID"] in data["Wordform"]:
+            form_file = Wordform_files(
+                object_pk=data["Wordform"][audio["ID"]].pk,
+                name=audio["Name"],
+                id=audio["ID"],
+                mime_type="audio/wav",
+            )
+            DBSession.add(form_file)
+            DBSession.flush()
+            DBSession.refresh(form_file)
 
     if check_table("ChapterTable"):
         log.info("Documents")
