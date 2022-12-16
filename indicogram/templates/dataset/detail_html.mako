@@ -10,8 +10,8 @@
 <h2>${ctx.name}</h2>
 
 <p class="lead">
-    Welcome to your digital grammar template.
-    Change this text in templates/dataset/detail_html.mako
+ This website is under construction.
+ Feel free to look around and explore what exists so far.
 </p>
 
 <%include file="landing_page.mako"/>
