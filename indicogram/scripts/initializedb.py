@@ -7,18 +7,12 @@ from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
-from clld_corpus_plugin.models import (SentenceSlice, SentenceTag, Speaker,
-                                       SpeakerSentence, Tag, Text,
-                                       TextSentence, TextTag)
+import clld_corpus_plugin.models as corpus
 from clld_document_plugin.models import Document
-from clld_morphology_plugin.models import (POS, FormMeaning, FormSlice,
-                                           Inflection, Lexeme,
-                                           LexemeLexemePart,
-                                           LexemeMorphemePart, Meaning, Morph,
-                                           Morpheme, MorphemeMeaning, Wordform,
-                                           Wordform_files)
+import clld_morphology_plugin.models as morpho
 from clldutils import licenses
 from pycldf import Sources
+import cldf_ldd
 
 import indicogram
 from indicogram import models
@@ -33,8 +27,6 @@ handler.setFormatter(
 log = logging.getLogger(__name__)
 log.propagate = False
 log.addHandler(handler)
-
-
 
 
 def listify(obj):
@@ -52,6 +44,12 @@ cc_icons = [
     "cc-by",
     "cc-zero",
 ]
+
+param_dict = {}
+def generate_description(rec):
+    return "none"
+    return param_dict.get(rec["Parameter_ID"], rec["Parameter_ID"])
+
 
 
 def get_license_data(license_tag, small=False):
@@ -73,7 +71,9 @@ def get_license_data(license_tag, small=False):
                 license_dict["license_icon"] = icon + ".png"
     return license_dict
 
+
 tag_dic = {}
+
 
 def tag_slug(tag):
     if tag not in tag_dic:
@@ -91,6 +91,7 @@ def main(args):
     cldf_tables = list(cldf.components.keys()) + [
         str(x.url) for x in cldf.tables
     ]  # a list of tables in the dataset
+
     recommended_tables = [
         x + "Table"
         for x in [
@@ -105,17 +106,35 @@ def main(args):
         ]
     ]
 
-    def check_table(tablename):
-        if tablename not in cldf_tables and tablename in recommended_tables:
-            log.warning(f"No {tablename} found")
-        return tablename in cldf_tables
+    def iter_table(tablename):
+        if tablename[0] == tablename[0].lower():
+            tname = f"{tablename}.csv"
+        else:
+            tname = tablename
+        if tname in cldf_tables:
+            log.info(tablename)
+            for entry in cldf.iter_rows(tname):
+                yield entry
+        elif tablename in recommended_tables:
+            log.warning("HELLO")
+        else:
+            log.warning(f"Table '{tname}' does not exist")
 
     demo_data = []
     data = Data()
     if "http" in cldf.properties.get("dc:identifier", ""):
-        domain=cldf.properties.get("dc:identifier").split("://")[1]
+        domain = cldf.properties.get("dc:identifier").split("://")[1]
     else:
-        domain="example.org/"
+        domain = "example.org/"
+
+    def get_link(rec, field, datafield=None):
+        if not datafield:
+            datafield = field.replace("_ID", "")
+        if field in rec and rec[field]:
+            if isinstance(rec[field], list):
+                return [data[datafield][x] for x in rec[field]]                
+            return data[datafield][rec[field]]
+        return None
 
     dataset = data.add(
         common.Dataset,
@@ -132,36 +151,31 @@ def main(args):
         publisher_url="",
     )
 
-    if check_table("ContributorTable"):  # the author(s)
-        log.info("Contributors")
-        for contributor in cldf.iter_rows("ContributorTable"):
-            if dataset.contact is None and contributor["Email"] is not None:
-                dataset.contact = contributor["Email"]
+    for contributor in iter_table("contributors"):
+        if dataset.contact is None and contributor["Email"] is not None:
+            dataset.contact = contributor["Email"]
 
-            jsondata = {}
-            if "Orcid" in contributor:
-                jsondata["orcid"] = contributor["Orcid"]
-            new_cont = data.add(
-                common.Contributor,
-                contributor["ID"],
-                id=contributor["ID"],
-                name=contributor["Name"],
-                email=contributor["Email"],
-                url=contributor["Url"],
-                jsondata=jsondata
-            )
-            dataset.editors.append(
-                common.Editor(
-                    contributor=new_cont, ord=contributor["Order"], primary=True
-                )
-            )
+        jsondata = {}
+        if "Orcid" in contributor:
+            jsondata["orcid"] = contributor["Orcid"]
+        new_cont = data.add(
+            common.Contributor,
+            contributor["ID"],
+            id=contributor["ID"],
+            name=contributor["Name"],
+            email=contributor["Email"],
+            url=contributor["Url"],
+            jsondata=jsondata,
+        )
+        dataset.editors.append(
+            common.Editor(contributor=new_cont, ord=contributor["Order"], primary=True)
+        )
 
     log.info("Sources")
     for rec in bibtex.Database.from_file(cldf.bibpath):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
-    if check_table("LanguageTable"):
-        log.info("Languages")
+    for lang in iter_table("LanguageTable"):
         for lang in cldf.iter_rows("LanguageTable"):
             data.add(
                 common.Language,
@@ -172,254 +186,218 @@ def main(args):
                 longitude=lang["Longitude"],
             )
 
-    if check_table("ParameterTable"):
-        log.info("Meanings")
-        for meaning in cldf.iter_rows("ParameterTable"):
-            data.add(Meaning, meaning["ID"], id=meaning["ID"], name=meaning["Name"])
+    for meaning in iter_table("ParameterTable"):
+        pass
+        # data.add(Meaning, meaning["ID"], id=meaning["ID"], name=meaning["Name"])
 
-    if check_table("PhonemeTable"):
-        log.info("Phonemes")
-        phoneme_dict = {}
-        for pnm in cldf.iter_rows("PhonemeTable"):
-            phoneme_dict[pnm["Name"]] = pnm["ID"]
-            data.add(models.Phoneme, pnm["ID"], id=pnm["ID"], name=pnm["Name"])
+    phoneme_dict = {}
+    for pnm in iter_table("phonemes"):
+        phoneme_dict[pnm["Name"]] = pnm["ID"]
+        data.add(morpho.Phoneme, pnm["ID"], id=pnm["ID"], name=pnm["Name"])
 
-    if check_table("POSTable"):
-        log.info("Parts of speech")
-        for pos in cldf.iter_rows("POSTable"):
+    for pos in iter_table("partsofspeech"):
+        data.add(
+            POS,
+            pos["ID"],
+            id=pos["ID"],
+            name=pos["Name"],
+            description=pos["Description"],
+        )
+
+    for wordform in iter_table("wordforms"):
+        new_form = data.add(
+            morpho.Wordform,
+            wordform["ID"],
+            id=wordform["ID"],
+            language=data["Language"][wordform["Language_ID"]],
+            name=wordform["Form"],
+            description=generate_description(wordform),
+            parts=wordform["Morpho_Segments"],
+        )
+    demo_data.append(
+        f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms."
+    )
+
+
+    for morpheme in iter_table("morphemes"):
+        data.add(
+            morpho.Morpheme,
+            morpheme["ID"],
+            id=morpheme["ID"],
+            name=morpheme["Name"],
+            language=data["Language"][morpheme["Language_ID"]],
+            description=generate_description(morpheme),
+        )
+
+    for morph in iter_table("morphs"):
+        new_morph = data.add(
+            morpho.Morph,
+            morph["ID"],
+            id=morph["ID"],
+            language=data["Language"][morph["Language_ID"]],
+            name=morph["Name"],
+            description=generate_description(morph),
+        )
+        if morph["Name"].startswith("-"):
+            new_morph.morph_type = "suffix"
+        elif morph["Name"].endswith("-"):
+            new_morph.morph_type = "prefix"
+        elif "<" in morph["Name"]:
+            new_morph.morph_type = "infix"
+        else:
+            new_morph.morph_type = "root"
+        new_morph.morpheme = get_link(morph, "Morpheme_ID")
+
+    for gloss in iter_table("glosses"):
+        data.add(morpho.Gloss, gloss["ID"], id=gloss["ID"], name=gloss["Name"])
+
+
+    for fslice in iter_table("wordformparts"):
+        wf = data["Wordform"][fslice["Wordform_ID"]]
+        morph = get_link(fslice, "Morph_ID")
+        if fslice["Index"]:
+            index = int(fslice["Index"])
+        else:
+            index = None
+        new_formpart = data.add(
+            morpho.WordformPart,
+            fslice["ID"],
+            id=fslice["ID"],
+            morph=morph,
+            form=wf,
+            index=index,
+        )
+        print(new_formpart, new_formpart.morph, new_formpart.form)
+        for gloss_id in fslice["Gloss_ID"]:
             data.add(
-                POS,
-                pos["ID"],
-                id=pos["ID"],
-                name=pos["Name"],
-                description=pos["Description"],
+                morpho.WordformPartGloss,
+                fslice["ID"] + gloss_id,
+                gloss=data["Gloss"][gloss_id],
+                formpart=new_formpart,
             )
 
-    if check_table("MorphsetTable"):
-        log.info("Morphemes")
-        for morpheme in cldf.iter_rows("MorphsetTable"):
-            meanings = listify(
-                morpheme["Parameter_ID"]
-            )  # todo: some uncertainty here about whether a form can have multiple meanings or not
-            new_morpheme = data.add(
-                Morpheme,
-                morpheme["ID"],
-                id=morpheme["ID"],
-                name=morpheme["Name"],
-                language=data["Language"][morpheme["Language_ID"]],
-                description=" / ".join(data["Meaning"][x].name for x in meanings),
-                comment=morpheme["Comment"],
-            )
-            for meaning in meanings:
+    for fslice in iter_table("formparts"):
+        data.add(
+            morpho.FormPart,
+            fslice["ID"],
+            wordform=data["Wordform"][fslice["Wordform_ID"]],
+            form=data["Form"][fslice["Form_ID"]],
+            index=int(fslice["Index"]),
+        )
+
+    for lexeme in iter_table("lexemes"):
+        new_lexeme = data.add(
+            morpho.Lexeme,
+            lexeme["ID"],
+            id=lexeme["ID"],
+            name=lexeme["Name"],
+            description=lexeme["Description"],
+            language=data["Language"][lexeme["Language_ID"]],
+        )
+        if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
+            x, y = lexeme["Paradigm_View"].split(";")
+            x = x.split(",")
+            y = y.split(",")
+            new_lexeme.paradigm_x = x
+            new_lexeme.paradigm_y = y
+
+    for stem in iter_table("stems"):
+        new_stem = data.add(
+            morpho.Stem,
+            stem["ID"],
+            id=stem["ID"],
+            name=stem["Name"],
+            description=generate_description(stem),
+            language=data["Language"][stem["Language_ID"]],
+            parts=stem["Morpho_Segments"],
+        )
+        stem_glosses = get_link(stem, "Gloss_ID") or []
+        if not isinstance(stem_glosses, list):
+            stem_glosses = [stem_glosses]
+        for stem_gloss in stem_glosses:
+            data.add(
+            morpho.StemGloss,
+            stem["ID"],
+            gloss=stem_gloss,
+            stem=new_stem,
+        )
+        new_stem.lexeme = get_link(stem, "Lexeme_ID")
+
+    for text in iter_table("texts"):
+        tags = text["Metadata"].pop("tags", [])
+        new_text = data.add(
+            Text,
+            text["ID"],
+            id=text["ID"],
+            name=text["Title"],
+            description=text["Description"],
+            text_metadata=text["Metadata"],
+        )
+        for tag in tags:
+            if tag not in data["Tag"]:
+                data.add(Tag, tag, id=tag, name=tag)
                 data.add(
-                    MorphemeMeaning,
-                    f"{morpheme['ID']}-{meaning}",
-                    id=f"{morpheme['ID']}-{meaning}",
-                    morpheme=new_morpheme,
-                    meaning=data["Meaning"][meaning],
+                    TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text
                 )
 
-    if check_table("MorphTable"):
-        log.info("Morphs")
-        for morph in cldf.iter_rows("MorphTable"):
+    for spk in iter_table("speakers"):
+        data.add(Speaker, spk["ID"], id=spk["ID"], name=spk["Abbreviation"])
+
+    for ex in iter_table("ExampleTable"):
+        ex["Analyzed_Word"] = ["" if x is None else x for x in ex["Analyzed_Word"]]
+        ex["Gloss"] = ["" if x is None else x for x in ex["Gloss"]]
+        new_ex = data.add(
+            common.Sentence,
+            ex["ID"],
+            id=ex["ID"],
+            name=ex["Primary_Text"],
+            description=ex["Translated_Text"],
+            analyzed="\t".join(ex["Analyzed_Word"]),
+            gloss="\t".join(ex["Gloss"]),
+            language=data["Language"][ex["Language_ID"]],
+            comment=ex["Comment"],
+        )
+        if "speakers.csv" in cldf_tables:
             data.add(
-                Morph,
-                morph["ID"],
-                id=morph["ID"],
-                name=morph["Name"],
-                language=data["Language"][morph["Language_ID"]],
-                morpheme=data["Morpheme"][morph["Morpheme_ID"]],
-                description=" / ".join(
-                    data["Meaning"][x].name
-                    for x in listify(morph["Parameter_ID"])  # todo uncertainty
-                ),
-            )
-
-    if check_table("FormTable"):
-        log.info("Wordforms")
-        for form in cldf.iter_rows("FormTable"):
-            meanings = [
-                data["Meaning"][x].name for x in listify(form["Parameter_ID"])
-            ]  # todo: some uncertainty here about whether a form can have multiple meanings or not
-            new_form = data.add(
-                Wordform,
-                form["ID"],
-                id=form["ID"],
-                name=form["Form"].replace("-", "").replace("∅", "").replace("Ø", ""),
-                segmented=form["Form"],
-                language=data["Language"][form["Language_ID"]],
-                description=" / ".join(meanings),
-            )
-
-            for meaning in listify(form["Parameter_ID"]):
-                data.add(
-                    FormMeaning,
-                    f"{form['ID']}-{meaning}",
-                    form=new_form,
-                    meaning=data["Meaning"][meaning],
-                )
-        demo_data.append(f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms.")
-
-    if check_table("FormSlices"):
-        log.info("Form slices")
-        for f_slice in cldf.iter_rows("FormSlices"):
-            morph = data["Morph"][f_slice["Morph_ID"]]
-            morpheme = morph.morpheme
-            morpheme_meaning_id = f"{morpheme.id}-{f_slice['Morpheme_Meaning']}"
-            form = data["Wordform"][f_slice["Form_ID"]]
-            form_meaning_id = f"{form.id}-{f_slice['Form_Meaning']}"
-
-            new_slice = data.add(
-                FormSlice,
-                f_slice["ID"],
-                form=form,
-                morph=morph,
-                morpheme_meaning=data["MorphemeMeaning"][morpheme_meaning_id],
-                form_meaning=data["FormMeaning"][form_meaning_id],
-            )
-            if f_slice["Index"]:
-                new_slice.index = int(
-                    f_slice["Index"]
-                )  # todo this should be specified in the CLDF metadata
-            else:
-                log.info(f_slice)
-
-    if check_table("TextTable"):
-        log.info("Texts")
-        for text in cldf.iter_rows("TextTable"):
-            tags = text["Metadata"].pop("tags", [])
-            new_text = data.add(
-                Text,
-                text["ID"],
-                id=text["ID"],
-                name=text["Title"],
-                description=text["Description"],
-                text_metadata=text["Metadata"],
-            )
-            for tag in tags:
-                if tag not in data["Tag"]:
-                    data.add(Tag, tag, id=tag, name=tag)
-                    data.add(TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text)
-
-    if check_table("SpeakerTable"):
-        log.info("Speakers")
-        for spk in cldf.iter_rows("SpeakerTable"):
-            data.add(Speaker, spk["ID"], id=spk["ID"], name=spk["Abbreviation"])
-
-    if check_table("ExampleTable"):
-        log.info("Examples")
-        for ex in cldf.iter_rows("ExampleTable"):
-            ex["Analyzed_Word"] = ["" if x is None else x for x in ex["Analyzed_Word"]]
-            ex["Gloss"] = ["" if x is None else x for x in ex["Gloss"]]
-            new_ex = data.add(
-                common.Sentence,
+                SpeakerSentence,
                 ex["ID"],
-                id=ex["ID"],
-                name=ex["Primary_Text"],
-                description=ex["Translated_Text"],
-                analyzed="\t".join(ex["Analyzed_Word"]),
-                gloss="\t".join(ex["Gloss"]),
-                language=data["Language"][ex["Language_ID"]],
-                comment=ex["Comment"],
+                sentence=new_ex,
+                speaker=data["Speaker"][ex["Speaker_ID"]],
             )
-            for tag in set(ex["Tags"]):
-                if not tag:
-                    continue
-                slug = tag_slug(tag)
-                if slug not in data["Tag"]:
-                    data.add(Tag, slug, id=slug, name=tag)
-                data.add(
-                    SentenceTag, ex["ID"] + slug, tag=data["Tag"][slug], sentence=new_ex
-                )
-            if check_table("SpeakerTable"):
-                data.add(
-                    SpeakerSentence,
-                    ex["ID"],
-                    sentence=new_ex,
-                    speaker=data["Speaker"][ex["Speaker_ID"]],
-                )
-            if ex.get("Text_ID", None) is not None:
-                data.add(
-                    TextSentence,
-                    ex["ID"],
-                    sentence=new_ex,
-                    text=data["Text"][ex["Text_ID"]],
-                    record_number=ex["Record_Number"],
-                    phrase_number=ex.get("Phrase_Number", None),
-                )
-            elif len(ex.get("Source", [])) > 0:
-                bibkey, pages = Sources.parse(ex["Source"][0])
-                source = data["Source"][bibkey]
-                DBSession.add(
-                    common.SentenceReference(
-                        sentence=new_ex, source=source, key=source.id, description=pages
-                    )
-                )
-        demo_data.append(
-            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
-        )
-
-    if check_table("ExampleSlices"):
-        log.info("Sentence slices")
-        for sf in cldf.iter_rows("ExampleSlices"):
-            if sf["Form_ID"] + "-" + sf["Parameter_ID"] not in data["FormMeaning"]:
-                log.warning(
-                    "This sentence slice's form ID is not associated with a meaning"
-                )
-                log.warning(sf)
-                continue
+        if ex.get("Text_ID", None) is not None:
             data.add(
-                SentenceSlice,
-                sf["ID"],
-                form=data["Wordform"][sf["Form_ID"]],
-                sentence=data["Sentence"][sf["Example_ID"]],
-                index=int(sf["Index"]),
-                form_meaning=data["FormMeaning"][
-                    sf["Form_ID"] + "-" + sf["Parameter_ID"]
-                ],
+                TextSentence,
+                ex["ID"],
+                sentence=new_ex,
+                text=data["Text"][ex["Text_ID"]],
+                record_number=ex["Record_Number"],
+                phrase_number=ex.get("Phrase_Number", None),
             )
+        elif len(ex.get("Source", [])) > 0:
+            bibkey, pages = Sources.parse(ex["Source"][0])
+            source = data["Source"][bibkey]
+            DBSession.add(
+                common.SentenceReference(
+                    sentence=new_ex, source=source, key=source.id, description=pages
+                )
+            )
+    demo_data.append(
+        f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
+    )
 
-    log.info("Lexemes")
-    for lex in cldf.iter_rows("LexemeTable"):
-        new_lex = data.add(
-            Lexeme,
-            lex["ID"],
-            id=lex["ID"],
-            name=lex["Name"],
-            description=lex["Description"],
-            language=data["Language"][lex["Language_ID"]],
-            comment=lex["Comment"],
-        )
-        if lex["ID"] in data["Morpheme"]:
-            new_lex.root_morpheme = data["Morpheme"][lex["ID"]]
-
-    for lexlex in cldf.iter_rows("LexemeLexemeParts"):
+    for sf in iter_table("exampleparts"):
         data.add(
-            LexemeLexemePart,
-            lexlex["ID"],
-            base_lexeme=data["Lexeme"][lexlex["Base_ID"]],
-            derived_lexeme=data["Lexeme"][lexlex["Lexeme_ID"]],
+            corpus.SentencePart,
+            sf["ID"],
+            form=data["Wordform"][sf["Wordform_ID"]],
+            sentence=data["Sentence"][sf["Example_ID"]],
+            index=int(sf["Index"]),
+            # form_meaning=data["FormMeaning"][
+            #     sf["Form_ID"] + "-" + sf["Parameter_ID"]
+            # ],
         )
 
-    for lexmorph in cldf.iter_rows("LexemeMorphemeParts"):
-        data.add(
-            LexemeMorphemePart,
-            lexmorph["ID"],
-            morpheme=data["Morpheme"][lexmorph["Morpheme_ID"]],
-            lexeme=data["Lexeme"][lexmorph["Lexeme_ID"]],
-        )
-
-    log.info("Inflected forms")
-    for form in cldf.iter_rows("InflectionTable"):
-        data.add(
-            Inflection,
-            form["ID"],
-            lexeme=data["Lexeme"][form["Lexeme_ID"]],
-            form=data["Wordform"][form["Form_ID"]],
-        )
-
-    log.info("Audio")
-    for audio in cldf.iter_rows("MediaTable"):
+    for audio in iter_table("MediaTable"):
         if audio["ID"] in data["Sentence"]:
             sentence_file = common.Sentence_files(
                 object_pk=data["Sentence"][audio["ID"]].pk,
@@ -441,30 +419,29 @@ def main(args):
             DBSession.flush()
             DBSession.refresh(form_file)
 
-    if check_table("ChapterTable"):
-        log.info("Documents")
-        chapters = {}
-        for chapter in cldf.iter_rows("ChapterTable"):
-            if chapter["ID"] == "landingpage":
-                dataset.description = chapter["Description"]
+    chapters = {}
+    for chapter in iter_table("chapters"):
+        if chapter["ID"] == "landingpage":
+            dataset.description = chapter["Description"]
+        else:
+            ch = data.add(
+                Document,
+                chapter["ID"],
+                id=chapter["ID"],
+                name=chapter["Name"],
+                description=chapter["Description"],
+                meta_data={},
+            )
+            if chapter["Number"] is not None:
+                ch.chapter_no = int(chapter["Number"])
+                ch.order = chr(int(chapter["Number"]) + 96)
+                chapters[ch.chapter_no] = ch
             else:
-                ch = data.add(
-                    Document,
-                    chapter["ID"],
-                    id=chapter["ID"],
-                    name=chapter["Name"],
-                    description=chapter["Description"],
-                    meta_data={},
-                )
-                if chapter["Number"] is not None:
-                    ch.chapter_no = int(chapter["Number"])
-                    ch.order = chr(int(chapter["Number"]) + 96)
-                    chapters[ch.chapter_no] = ch
-                else:
-                    ch.order = "z"
-        for nr, chapter in chapters.items():
-            if 1 < nr:
-                chapter.preceding = chapters[nr - 1]
+                ch.order = "z"
+    for nr, chapter in chapters.items():
+        if 1 < nr:
+            chapter.preceding = chapters[nr - 1]
+
     if not dataset.description:
         dataset.description = (
             f"Welcome to your fresh new CLLD grammar! "

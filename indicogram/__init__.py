@@ -1,8 +1,7 @@
 from clld_corpus_plugin.models import Text
 from clld_document_plugin import decorate_gloss_string
 from clld_markdown_plugin import comma_and_list
-from clld_morphology_plugin.models import (POS, Lexeme, Morph, Morpheme,
-                                           Wordform)
+from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
 from pyramid.config import Configurator
 
 from indicogram import interfaces, models
@@ -44,6 +43,7 @@ def render_lfts(req, objid, table, session, **kwargs):
         md_str += f" ‘{', '.join(meanings)}’"
     return md_str
 
+
 def render_lex(req, objid, table, session, **kwargs):
     unit = session.query(Lexeme).filter(Lexeme.id == objid).first()
     url = req.route_url("lexeme", id=objid, **kwargs)
@@ -58,6 +58,7 @@ def render_lex(req, objid, table, session, **kwargs):
         ]
         md_str += f" ‘{', '.join(meanings)}’"
     return md_str
+
 
 def main(global_config, **settings):
     """This function returns a Pyramid WSGI application."""
