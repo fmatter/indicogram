@@ -267,7 +267,6 @@ def main(args):
             form=wf,
             index=index,
         )
-        print(new_formpart, new_formpart.morph, new_formpart.form)
         for gloss_id in fslice["Gloss_ID"]:
             data.add(
                 morpho.WordformPartGloss,
@@ -324,9 +323,12 @@ def main(args):
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
     for text in iter_table("texts"):
-        tags = text["Metadata"].pop("tags", [])
+        if text["Metadata"]:
+            tags = text["Metadata"].pop("tags", [])
+        else:
+            tags = []
         new_text = data.add(
-            Text,
+            corpus.Text,
             text["ID"],
             id=text["ID"],
             name=text["Title"],
@@ -335,13 +337,13 @@ def main(args):
         )
         for tag in tags:
             if tag not in data["Tag"]:
-                data.add(Tag, tag, id=tag, name=tag)
+                data.add(corpus.Tag, tag, id=tag, name=tag)
                 data.add(
-                    TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text
+                    corpus.TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text
                 )
 
     for spk in iter_table("speakers"):
-        data.add(Speaker, spk["ID"], id=spk["ID"], name=spk["Abbreviation"])
+        data.add(corpus.Speaker, spk["ID"], id=spk["ID"], name=spk["Abbreviation"])
 
     for ex in iter_table("ExampleTable"):
         ex["Analyzed_Word"] = ["" if x is None else x for x in ex["Analyzed_Word"]]
@@ -359,14 +361,14 @@ def main(args):
         )
         if "speakers.csv" in cldf_tables:
             data.add(
-                SpeakerSentence,
+                corpus.SpeakerSentence,
                 ex["ID"],
                 sentence=new_ex,
                 speaker=data["Speaker"][ex["Speaker_ID"]],
             )
         if ex.get("Text_ID", None) is not None:
             data.add(
-                TextSentence,
+                corpus.TextSentence,
                 ex["ID"],
                 sentence=new_ex,
                 text=data["Text"][ex["Text_ID"]],
@@ -409,7 +411,7 @@ def main(args):
             DBSession.flush()
             DBSession.refresh(sentence_file)
         elif audio["ID"] in data["Wordform"]:
-            form_file = Wordform_files(
+            form_file = corpus.Wordform_files(
                 object_pk=data["Wordform"][audio["ID"]].pk,
                 name=audio["Name"],
                 id=audio["ID"],
