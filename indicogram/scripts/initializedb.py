@@ -46,9 +46,10 @@ cc_icons = [
 ]
 
 param_dict = {}
+
+
 def generate_description(rec):
     return ", ".join([param_dict.get(x, x) for x in listify(rec["Parameter_ID"])])
-
 
 
 def get_license_data(license_tag, small=False):
@@ -131,7 +132,7 @@ def main(args):
             datafield = field.replace("_ID", "")
         if field in rec and rec[field]:
             if isinstance(rec[field], list):
-                return [data[datafield][x] for x in rec[field]]                
+                return [data[datafield][x] for x in rec[field]]
             return data[datafield][rec[field]]
         return None
 
@@ -217,7 +218,6 @@ def main(args):
         f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms."
     )
 
-
     for morpheme in iter_table("morphemes"):
         data.add(
             morpho.Morpheme,
@@ -249,7 +249,6 @@ def main(args):
 
     for gloss in iter_table("glosses"):
         data.add(morpho.Gloss, gloss["ID"], id=gloss["ID"], name=gloss["Name"])
-
 
     for fslice in iter_table("wordformparts"):
         wf = data["Wordform"][fslice["Wordform_ID"]]
@@ -314,11 +313,11 @@ def main(args):
             stem_glosses = [stem_glosses]
         for stem_gloss in stem_glosses:
             data.add(
-            morpho.StemGloss,
-            stem["ID"],
-            gloss=stem_gloss,
-            stem=new_stem,
-        )
+                morpho.StemGloss,
+                stem["ID"],
+                gloss=stem_gloss,
+                stem=new_stem,
+            )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
     for text in iter_table("texts"):
@@ -338,7 +337,10 @@ def main(args):
             if tag not in data["Tag"]:
                 data.add(corpus.Tag, tag, id=tag, name=tag)
                 data.add(
-                    corpus.TextTag, text["ID"] + tag, tag=data["Tag"][tag], text=new_text
+                    corpus.TextTag,
+                    text["ID"] + tag,
+                    tag=data["Tag"][tag],
+                    text=new_text,
                 )
 
     for spk in iter_table("speakers"):
