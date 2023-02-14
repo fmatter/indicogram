@@ -47,8 +47,7 @@ cc_icons = [
 
 param_dict = {}
 def generate_description(rec):
-    return "none"
-    return param_dict.get(rec["Parameter_ID"], rec["Parameter_ID"])
+    return ", ".join([param_dict.get(x, x) for x in listify(rec["Parameter_ID"])])
 
 
 
@@ -187,7 +186,7 @@ def main(args):
             )
 
     for meaning in iter_table("ParameterTable"):
-        pass
+        param_dict[meaning["ID"]] = meaning["Name"]
         # data.add(Meaning, meaning["ID"], id=meaning["ID"], name=meaning["Name"])
 
     phoneme_dict = {}
