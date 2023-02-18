@@ -30,6 +30,8 @@ def render_lfts(req, objid, table, session, **kwargs):
     with_translation = "no_translation" not in kwargs
     md_str = f"*[{unit.name}]({url})*"
     translation = get_kwarg("translation", kwargs)
+    if not translation:
+        translation = unit.description
     if with_translation:
         meanings = [
             decorate_gloss_string(
