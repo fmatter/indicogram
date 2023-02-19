@@ -12,10 +12,8 @@ from clld_document_plugin.models import Document
 import clld_morphology_plugin.models as morpho
 from clldutils import licenses
 from pycldf import Sources
-import cldf_ldd
 
 import indicogram
-from indicogram import models
 from slugify import slugify
 
 csv.field_size_limit(sys.maxsize)
@@ -269,6 +267,17 @@ def main(args):
                 formpart=new_formpart,
             )
 
+    for form in iter_table("forms"):
+        data.add(
+            morpho.Form,
+            form["ID"],
+            id=form["ID"],
+            name=form["Form"],
+            parts=form["Morpho_Segments"],
+            description=generate_description(form),
+            language=data["Language"][form["Language_ID"]],
+        )
+
     for fslice in iter_table("formparts"):
         data.add(
             morpho.FormPart,
@@ -431,9 +440,11 @@ def main(args):
                     sentence=new_ex, source=source, key=source.id, description=pages
                 )
             )
-    demo_data.append(
-        f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
-    )
+
+    if "ExampleTable" in cldf_tables:
+        demo_data.append(
+            f"""As you can see in <a class="exref" example_id="{new_ex.id}"></a>, everything can be a link!\n[](ExampleTable#cldf:{new_ex.id})"""
+        )
 
     for sf in iter_table("exampleparts"):
         data.add(
