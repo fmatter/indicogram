@@ -108,17 +108,13 @@ def main(args):
 
     def iter_table(tablename):
         if tablename[0] == tablename[0].lower():
-            tname = f"{tablename}.csv"
-        else:
-            tname = tablename
-        if tname in cldf_tables:
+            tablename = f"{tablename}.csv"
+        if tablename in cldf_tables:
             log.info(tablename)
-            for entry in cldf.iter_rows(tname):
+            for entry in cldf.iter_rows(tablename):
                 yield entry
-        elif tablename in recommended_tables:
-            log.warning("HELLO")
         else:
-            log.warning(f"Table '{tname}' does not exist")
+            log.warning(f"Table '{tablename}' does not exist")
 
     demo_data = []
     data = Data()
@@ -197,7 +193,7 @@ def main(args):
 
     for pos in iter_table("partsofspeech"):
         data.add(
-            POS,
+            morpho.POS,
             pos["ID"],
             id=pos["ID"],
             name=pos["Name"],
@@ -319,6 +315,15 @@ def main(args):
                 stem=new_stem,
             )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
+
+    for sslice in iter_table("wordformstems"):
+        data.add(
+            morpho.WordformStem,
+            sslice["ID"],
+            form=data["Wordform"][sslice["Wordform_ID"]],
+            stem=data["Stem"][sslice["Stem_ID"]],
+            index=[int(sslice["Index"])],
+        )
 
     for text in iter_table("texts"):
         if text["Metadata"]:
