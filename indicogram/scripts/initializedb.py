@@ -316,6 +316,25 @@ def main(args):
             )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
+
+    for sslice in iter_table("stemparts"):
+        new_stempart = data.add(
+            morpho.StemPart,
+            sslice["ID"],
+            morph=data["Morph"][sslice["Morph_ID"]],
+            stem=data["Stem"][sslice["Stem_ID"]],
+            index=int(sslice["Index"]),
+        )
+        for gloss_id in sslice["Gloss_ID"]:
+            data.add(
+                morpho.StemPartGloss,
+                sslice["ID"] + gloss_id,
+                gloss=data["Gloss"][gloss_id],
+                stempart=new_stempart,
+            )
+
+
+
     for sslice in iter_table("wordformstems"):
         data.add(
             morpho.WordformStem,
