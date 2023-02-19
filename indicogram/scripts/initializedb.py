@@ -114,6 +114,16 @@ def main(args):
         else:
             log.warning(f"Table '{tablename}' does not exist")
 
+    def get_link(rec, field, datafield=None):
+        if not datafield:
+            datafield = field.replace("_ID", "")
+        if field in rec and rec[field]:
+            if isinstance(rec[field], list):
+                return [data[datafield][x] for x in rec[field]]                
+            return data[datafield][rec[field]]
+        return None
+
+
     demo_data = []
     data = Data()
     if "http" in cldf.properties.get("dc:identifier", ""):
@@ -349,6 +359,33 @@ def main(args):
             stem=data["Stem"][sslice["Stem_ID"]],
             index=[int(sslice["Index"])],
         )
+    for process in iter_table("derivationalprocesses"):
+        data.add(
+            morpho.DerivationalProcess,
+            process["ID"],
+            id=process["ID"],
+            name=process["Name"],
+            description=process["Description"],
+        )
+    for derivation in iter_table("derivations"):
+        sstem = get_link(derivation, "Source_ID", "Stem")
+        sroot = get_link(derivation, "Root_ID", "Morph")
+        new_deriv = data.add(
+            morpho.Derivation,
+            derivation["ID"],
+            process=data["DerivationalProcess"][derivation["Process_ID"]],
+            source_stem=sstem,
+            source_root=sroot,
+            target=data["Stem"][derivation["Target_ID"]],
+        )
+        for idx, stempart_id in enumerate(derivation["Stempart_IDs"]):
+            data.add(
+                morpho.StemPartDerivation,
+                f"{derivation['ID']}-{idx}",
+                stempart=data["StemPart"][stempart_id],
+                derivation=new_deriv,
+            )
+
 
     for cat in iter_table("inflectionalcategories"):
         data.add(morpho.InflectionalCategory, cat["ID"], id=cat["ID"], name=cat["Name"])
@@ -374,6 +411,7 @@ def main(args):
                 f"{wfpart}-{infl['ID']}",
                 formpart=data["WordformPart"][wfpart],
                 inflection=new_infl,
+                form=get_link(infl, "Form_ID")
             )
 
     for text in iter_table("texts"):
