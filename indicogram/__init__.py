@@ -41,7 +41,12 @@ def render_lfts(req, objid, table, session, **kwargs):
             for x in unit.meanings
         ]
         if translation:
-            meanings = [decorate_gloss_string(translation)]
+            meanings = [
+                decorate_gloss_string(
+                    translation,
+                    decoration=lambda x: f"<span class='smallcaps'>{x}</span>",
+                )
+            ]
         md_str += f" ‘{', '.join(meanings)}’"
     return md_str
 
