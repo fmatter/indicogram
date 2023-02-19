@@ -316,7 +316,6 @@ def main(args):
             )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
-
     for sslice in iter_table("stemparts"):
         new_stempart = data.add(
             morpho.StemPart,
@@ -333,8 +332,6 @@ def main(args):
                 stempart=new_stempart,
             )
 
-
-
     for sslice in iter_table("wordformstems"):
         data.add(
             morpho.WordformStem,
@@ -343,6 +340,32 @@ def main(args):
             stem=data["Stem"][sslice["Stem_ID"]],
             index=[int(sslice["Index"])],
         )
+
+    for cat in iter_table("inflectionalcategories"):
+        data.add(morpho.InflectionalCategory, cat["ID"], id=cat["ID"], name=cat["Name"])
+    for val in iter_table("inflectionalvalues"):
+        data.add(
+            morpho.InflectionalValue,
+            val["ID"],
+            id=val["ID"],
+            name=val["Name"],
+            category=data["InflectionalCategory"][val["Category_ID"]],
+            gloss=data["Gloss"][val["Gloss_ID"]],
+        )
+    for infl in iter_table("inflections"):
+        new_infl = data.add(
+            morpho.Inflection,
+            infl["ID"],
+            value=data["InflectionalValue"][infl["Value_ID"]],
+            stem=data["Stem"][infl["Stem_ID"]],
+        )
+        for wfpart in infl["Wordformpart_ID"]:
+            data.add(
+                morpho.WordformPartInflection,
+                f"{wfpart}-{infl['ID']}",
+                formpart=data["WordformPart"][wfpart],
+                inflection=new_infl,
+            )
 
     for text in iter_table("texts"):
         if text["Metadata"]:
