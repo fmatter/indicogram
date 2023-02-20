@@ -28,3 +28,7 @@ Setup:
 3. `pip install -e .[dev]`
 4. `clld initdb development.ini --cldf /path/to/your/cldf/metadata.json`
 5. `pserve development.ini`
+
+## Changelog
+
+* 2023-02-20: using [cldf-ldd](https://pypi.org/project/cldf-ldd/)

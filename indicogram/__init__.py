@@ -3,7 +3,7 @@ from clld_document_plugin import decorate_gloss_string
 from clld_markdown_plugin import comma_and_list
 from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
 from pyramid.config import Configurator
-
+from cldf_ldd.components import TextTable, MorphemeTable, MorphTable, WordformTable, POSTable, LexemeTable
 from indicogram import interfaces, models
 
 
@@ -71,22 +71,22 @@ def main(global_config, **settings):
     """This function returns a Pyramid WSGI application."""
     settings["clld_markdown_plugin"] = {
         "model_map": {
-            "MorphTable": {
+            MorphTable["url"]: {
                 "route": "morph",
                 "model": Morph,
                 "decorate": lambda x: f"*{x}*",
             },
-            "TextTable": {
+            TextTable["url"]: {
                 "route": "text",
                 "model": Text,
                 "decorate": lambda x: f"'{x}'",
             },
-            "PhonemeTable": {
+            "phonemes.csv": {
                 "route": "phoneme",
                 "model": models.Phoneme,
                 "decorate": lambda x: f"/{x}/",
             },
-            "POSTable": {"route": "pos", "model": POS},
+            POSTable["url"]: {"route": "pos", "model": POS},
             "FormTable": {
                 "route": "wordform",
                 "model": Wordform,
@@ -94,9 +94,9 @@ def main(global_config, **settings):
             },
         },
         "renderer_map": {
-            "MorphsetTable": render_lfts,
-            "FormTable": render_lfts,
-            "LexemeTable": render_lex,
+            MorphemeTable["url"]: render_lfts,
+            WordformTable["url"]: render_lfts,
+            LexemeTable["url"]: render_lex,
         },
         "extensions": [],
     }
