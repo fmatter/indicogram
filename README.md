@@ -31,4 +31,7 @@ Setup:
 
 ## Changelog
 
-* 2023-02-20: using [cldf-ldd](https://pypi.org/project/cldf-ldd/)
+### 2023-02-20
+* using [cldf-ldd](https://pypi.org/project/cldf-ldd/)
+* better init script
+* fixed gloss formatting
