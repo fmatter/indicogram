@@ -111,8 +111,8 @@ def main(args):
             log.info(tablename)
             for entry in cldf.iter_rows(tablename):
                 yield entry
-        else:
-            log.warning(f"Table '{tablename}' does not exist")
+        # else:
+        #     log.warning(f"Table '{tablename}' does not exist")
 
     def get_link(rec, field, datafield=None):
         if not datafield:
@@ -197,7 +197,7 @@ def main(args):
     phoneme_dict = {}
     for pnm in iter_table("phonemes"):
         phoneme_dict[pnm["Name"]] = pnm["ID"]
-        data.add(morpho.Phoneme, pnm["ID"], id=pnm["ID"], name=pnm["Name"])
+        data.add(indicogram.models.Phoneme, pnm["ID"], id=pnm["ID"], name=pnm["Name"])
 
     for pos in iter_table("partsofspeech"):
         data.add(
