@@ -12,18 +12,19 @@ def get_kwarg(string, kwargs):
 
 
 table_dic = {
-    "MorphsetTable": [Morpheme, "morpheme"],
-    "FormTable": [Wordform, "wordform"],
-    "LexemeTable": [Lexeme, "lexeme"],
+    MorphemeTable["url"]: [Morpheme, "morpheme"],
+    WordformTable["url"]: [Wordform, "wordform"],
+    LexemeTable["url"]: [Lexeme, "lexeme"],
+    MorphTable["url"]: [Morph, "morph"]
 }
 
 
 def render_lfts(req, objid, table, session, **kwargs):
     model, route = table_dic[table]
     if "ids" in kwargs:
-        ids = kwargs["ids"][0].split(",")
+        ids = kwargs.pop("ids")[0].split(",")
         return comma_and_list(
-            [render_lfts(req, unit_id, table, session) for unit_id in ids]
+            [render_lfts(req, unit_id, table, session, **kwargs) for unit_id in ids]
         )
     unit = session.query(model).filter(model.id == objid).first()
     url = req.route_url(route, id=objid, **kwargs)
@@ -33,13 +34,13 @@ def render_lfts(req, objid, table, session, **kwargs):
     if not translation:
         translation = unit.description
     if with_translation:
-        meanings = [
-            decorate_gloss_string(
-                x.meaning.name,
-                decoration=lambda x: f"<span class='smallcaps'>{x}</span>",
-            )
-            for x in unit.meanings
-        ]
+        # meanings = [
+        #     decorate_gloss_string(
+        #         x.meaning.name,
+        #         decoration=lambda x: f"<span class='smallcaps'>{x}</span>",
+        #     )
+        #     for x in unit.meanings
+        # ]
         if translation:
             meanings = [
                 decorate_gloss_string(
@@ -71,11 +72,6 @@ def main(global_config, **settings):
     """This function returns a Pyramid WSGI application."""
     settings["clld_markdown_plugin"] = {
         "model_map": {
-            MorphTable["url"]: {
-                "route": "morph",
-                "model": Morph,
-                "decorate": lambda x: f"*{x}*",
-            },
             TextTable["url"]: {
                 "route": "text",
                 "model": Text,
@@ -94,9 +90,10 @@ def main(global_config, **settings):
             },
         },
         "renderer_map": {
+            MorphTable["url"]: render_lfts,
             MorphemeTable["url"]: render_lfts,
             WordformTable["url"]: render_lfts,
-            LexemeTable["url"]: render_lex,
+            LexemeTable["url"]: render_lfts,
         },
         "extensions": [],
     }
