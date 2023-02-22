@@ -8,7 +8,7 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
 import clld_corpus_plugin.models as corpus
-from clld_document_plugin.models import Document
+import clld_document_plugin.models as doc
 import clld_morphology_plugin.models as morpho
 from clldutils import licenses
 from pycldf import Sources
@@ -119,10 +119,9 @@ def main(args):
             datafield = field.replace("_ID", "")
         if field in rec and rec[field]:
             if isinstance(rec[field], list):
-                return [data[datafield][x] for x in rec[field]]                
+                return [data[datafield][x] for x in rec[field]]
             return data[datafield][rec[field]]
         return None
-
 
     demo_data = []
     data = Data()
@@ -218,9 +217,11 @@ def main(args):
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
         )
-    demo_data.append(
-        f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms."
-    )
+
+    if "wordforms.csv" in cldf_tables:
+        demo_data.append(
+            f"[](FormTable#cldf:{new_form.id}) is one of my favorite [](LanguageTable#cldf:{new_form.language.id}) wordforms."
+        )
 
     for morpheme in iter_table("morphemes"):
         data.add(
@@ -386,7 +387,6 @@ def main(args):
                 derivation=new_deriv,
             )
 
-
     for cat in iter_table("inflectionalcategories"):
         data.add(morpho.InflectionalCategory, cat["ID"], id=cat["ID"], name=cat["Name"])
     for val in iter_table("inflectionalvalues"):
@@ -411,7 +411,7 @@ def main(args):
                 f"{wfpart}-{infl['ID']}",
                 formpart=data["WordformPart"][wfpart],
                 inflection=new_infl,
-                form=get_link(infl, "Form_ID")
+                form=get_link(infl, "Form_ID"),
             )
 
     for text in iter_table("texts"):
@@ -524,7 +524,7 @@ def main(args):
             dataset.description = chapter["Description"]
         else:
             ch = data.add(
-                Document,
+                doc.Document,
                 chapter["ID"],
                 id=chapter["ID"],
                 name=chapter["Name"],
@@ -540,6 +540,24 @@ def main(args):
     for nr, chapter in chapters.items():
         if 1 < nr:
             chapter.preceding = chapters[nr - 1]
+
+    for topic in iter_table("topics"):
+        new_topic = data.add(
+            doc.Topic,
+            topic["ID"],
+            id=topic["ID"],
+            name=topic["Name"],
+            description=topic["Description"],
+        )
+        for ref, label in topic["References"]:
+            data.add(
+                doc.TopicDocument,
+                topic["ID"] + slugify(ref),
+                topic=new_topic,
+                document=data["Document"]["nouns"],
+                label=label,
+                section=ref,
+            )
 
     if not dataset.description:
         dataset.description = (
