@@ -3,7 +3,14 @@ from clld_document_plugin import decorate_gloss_string
 from clld_markdown_plugin import comma_and_list
 from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
 from pyramid.config import Configurator
-from cldf_ldd.components import TextTable, MorphemeTable, MorphTable, WordformTable, POSTable, LexemeTable
+from cldf_ldd.components import (
+    TextTable,
+    MorphemeTable,
+    MorphTable,
+    WordformTable,
+    POSTable,
+    LexemeTable,
+)
 from indicogram import interfaces, models
 
 
@@ -15,7 +22,7 @@ table_dic = {
     MorphemeTable["url"]: [Morpheme, "morpheme"],
     WordformTable["url"]: [Wordform, "wordform"],
     LexemeTable["url"]: [Lexeme, "lexeme"],
-    MorphTable["url"]: [Morph, "morph"]
+    MorphTable["url"]: [Morph, "morph"],
 }
 
 
