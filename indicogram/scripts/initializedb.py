@@ -205,6 +205,7 @@ def main(args):
             id=pos["ID"],
             name=pos["Name"],
             description=pos["Description"],
+            language=data["Language"][pos["Language_ID"]]
         )
 
     for wordform in iter_table("wordforms"):
@@ -549,13 +550,14 @@ def main(args):
             name=topic["Name"],
             description=topic["Description"],
         )
-        for ref, label in topic["References"]:
+        for ref, label, title in topic["References"]:
+            print(ref, label)
             data.add(
                 doc.TopicDocument,
                 topic["ID"] + slugify(ref),
                 topic=new_topic,
                 document=data["Document"]["nouns"],
-                label=label,
+                label=title,
                 section=ref,
             )
 
