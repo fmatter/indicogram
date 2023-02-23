@@ -304,7 +304,7 @@ def main(args):
             lexeme["ID"],
             id=lexeme["ID"],
             name=lexeme["Name"],
-            description=lexeme["Description"],
+            description=lexeme["Description"] or generate_description(lexeme),
             language=data["Language"][lexeme["Language_ID"]],
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
