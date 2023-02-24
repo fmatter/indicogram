@@ -84,7 +84,6 @@ def tag_slug(tag):
 
 
 def main(args):
-
     cldf = args.cldf  # passed in via --cldf
     cldf_tables = list(cldf.components.keys()) + [
         str(x.url) for x in cldf.tables
@@ -179,15 +178,14 @@ def main(args):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
     for lang in iter_table("LanguageTable"):
-        for lang in cldf.iter_rows("LanguageTable"):
-            data.add(
-                common.Language,
-                lang["ID"],
-                id=lang["ID"],
-                name=lang["Name"],
-                latitude=lang["Latitude"],
-                longitude=lang["Longitude"],
-            )
+        data.add(
+            common.Language,
+            lang["ID"],
+            id=lang["ID"],
+            name=lang["Name"],
+            latitude=lang["Latitude"],
+            longitude=lang["Longitude"],
+        )
 
     for meaning in iter_table("ParameterTable"):
         param_dict[meaning["ID"]] = meaning["Name"]
@@ -205,7 +203,7 @@ def main(args):
             id=pos["ID"],
             name=pos["Name"],
             description=pos["Description"],
-            language=data["Language"][pos["Language_ID"]]
+            language=data["Language"][pos["Language_ID"]],
         )
 
     for wordform in iter_table("wordforms"):
