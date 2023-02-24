@@ -31,6 +31,9 @@ Setup:
 
 ## Changelog
 
+### 2023-02-23
+* glossing abbreviations
+
 ### 2023-02-20
 * added topics (referencing sections)
 

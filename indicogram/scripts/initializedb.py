@@ -559,6 +559,9 @@ def main(args):
                 section=ref,
             )
 
+    for abbr in iter_table("abbreviations"):
+        data.add(common.GlossAbbreviation, abbr["ID"], id=abbr["ID"], name=abbr["Description"])
+
     if not dataset.description:
         dataset.description = (
             f"Welcome to your fresh new CLLD grammar! "
