@@ -47,6 +47,7 @@ param_dict = {}
 
 
 def generate_description(rec):
+    print(rec)
     return ", ".join([param_dict.get(x, x) for x in listify(rec["Parameter_ID"])])
 
 
@@ -387,7 +388,13 @@ def main(args):
             )
 
     for cat in iter_table("inflectionalcategories"):
-        data.add(morpho.InflectionalCategory, cat["ID"], id=cat["ID"], name=cat["Name"])
+        data.add(
+            morpho.InflectionalCategory,
+            cat["ID"],
+            id=cat["ID"],
+            name=cat["Name"],
+            value_order=cat.get("Value_Order", []),
+        )
     for val in iter_table("inflectionalvalues"):
         data.add(
             morpho.InflectionalValue,
@@ -560,7 +567,12 @@ def main(args):
             )
 
     for abbr in iter_table("abbreviations"):
-        data.add(common.GlossAbbreviation, abbr["ID"], id=abbr["ID"], name=abbr["Description"])
+        data.add(
+            common.GlossAbbreviation,
+            abbr["ID"],
+            id=abbr["ID"],
+            name=abbr["Description"],
+        )
 
     if not dataset.description:
         dataset.description = (
