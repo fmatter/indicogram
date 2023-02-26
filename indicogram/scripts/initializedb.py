@@ -47,7 +47,6 @@ param_dict = {}
 
 
 def generate_description(rec):
-    print(rec)
     return ", ".join([param_dict.get(x, x) for x in listify(rec["Parameter_ID"])])
 
 
@@ -556,7 +555,6 @@ def main(args):
             description=topic["Description"],
         )
         for ref, label, title in topic["References"]:
-            print(ref, label)
             data.add(
                 doc.TopicDocument,
                 topic["ID"] + slugify(ref),
