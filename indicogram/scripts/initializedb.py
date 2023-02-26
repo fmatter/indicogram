@@ -188,8 +188,7 @@ def main(args):
         )
 
     for meaning in iter_table("ParameterTable"):
-        param_dict[meaning["ID"]] = meaning["Name"]
-        # data.add(Meaning, meaning["ID"], id=meaning["ID"], name=meaning["Name"])
+        param_dict[meaning["ID"]] = meaning["Name"] or "unknown meaning"
 
     phoneme_dict = {}
     for pnm in iter_table("phonemes"):
