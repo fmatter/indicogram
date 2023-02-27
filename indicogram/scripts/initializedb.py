@@ -306,11 +306,8 @@ def main(args):
             language=data["Language"][lexeme["Language_ID"]],
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
-            x, y = lexeme["Paradigm_View"].split(";")
-            x = x.split(",")
-            y = y.split(",")
-            new_lexeme.paradigm_x = x
-            new_lexeme.paradigm_y = y
+            new_lexeme.paradigm_x = lexeme["Paradigm_View"]["x"]
+            new_lexeme.paradigm_y = lexeme["Paradigm_View"]["y"]
 
     for stem in iter_table("stems"):
         new_stem = data.add(
