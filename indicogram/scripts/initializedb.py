@@ -365,6 +365,7 @@ def main(args):
             id=process["ID"],
             name=process["Name"],
             description=process["Description"],
+            language=get_link(process, "Language_ID")
         )
     for derivation in iter_table("derivations"):
         sstem = get_link(derivation, "Source_ID", "Stem")
