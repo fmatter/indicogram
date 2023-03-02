@@ -210,6 +210,13 @@ def main(args):
         if wordform["Source"]:
             bibkey, pages = Sources.parse(wordform["Source"][0])
             new_form.source = data["Source"][bibkey]
+        if wordform["Media_ID"]:
+            morpho.Wordform_files(
+                object=new_form,
+                id=wordform["Media_ID"],
+                name=wordform["Media_ID"].replace(".wav", ""),
+                mime_type="audio/wav",
+            )
 
     if "wordforms.csv" in cldf_tables:
         demo_data.append(
@@ -299,6 +306,7 @@ def main(args):
             name=lexeme["Name"],
             description=lexeme["Description"] or generate_description(lexeme),
             language=data["Language"][lexeme["Language_ID"]],
+            pos=get_link(lexeme, "Part_Of_Speech", "POS")
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
             new_lexeme.paradigm_x = lexeme["Paradigm_View"]["x"]
@@ -504,16 +512,6 @@ def main(args):
             DBSession.add(sentence_file)
             DBSession.flush()
             DBSession.refresh(sentence_file)
-        elif audio["ID"] in data["Wordform"]:
-            form_file = corpus.Wordform_files(
-                object_pk=data["Wordform"][audio["ID"]].pk,
-                name=audio["Name"],
-                id=audio["ID"],
-                mime_type="audio/wav",
-            )
-            DBSession.add(form_file)
-            DBSession.flush()
-            DBSession.refresh(form_file)
 
     chapters = {}
     for chapter in iter_table("chapters"):
