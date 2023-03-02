@@ -205,6 +205,7 @@ def main(args):
             name=wordform["Form"],
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
+            pos=get_link(wordform, "Part_Of_Speech", "POS")
         )
         if wordform["Source"]:
             bibkey, pages = Sources.parse(wordform["Source"][0])
