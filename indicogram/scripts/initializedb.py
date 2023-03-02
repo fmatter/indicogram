@@ -206,6 +206,9 @@ def main(args):
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
         )
+        if wordform["Source"]:
+            bibkey, pages = Sources.parse(wordform["Source"][0])
+            new_form.source = data["Source"][bibkey]
 
     if "wordforms.csv" in cldf_tables:
         demo_data.append(
