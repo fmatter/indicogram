@@ -113,15 +113,6 @@ def main(args):
         # else:
         #     log.warning(f"Table '{tablename}' does not exist")
 
-    def get_link(rec, field, datafield=None):
-        if not datafield:
-            datafield = field.replace("_ID", "")
-        if field in rec and rec[field]:
-            if isinstance(rec[field], list):
-                return [data[datafield][x] for x in rec[field]]
-            return data[datafield][rec[field]]
-        return None
-
     demo_data = []
     data = Data()
     if "http" in cldf.properties.get("dc:identifier", ""):
