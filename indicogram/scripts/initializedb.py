@@ -205,7 +205,7 @@ def main(args):
             name=wordform["Form"],
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
-            pos=get_link(wordform, "Part_Of_Speech", "POS")
+            pos=get_link(wordform, "Part_Of_Speech", "POS"),
         )
         if wordform["Source"]:
             bibkey, pages = Sources.parse(wordform["Source"][0])
@@ -214,7 +214,7 @@ def main(args):
             morpho.Wordform_files(
                 object=new_form,
                 id=wordform["Media_ID"],
-                name=wordform["Media_ID"].replace(".wav", ""),
+                name=wordform["Media_ID"],
                 mime_type="audio/wav",
             )
 
@@ -306,7 +306,7 @@ def main(args):
             name=lexeme["Name"],
             description=lexeme["Description"] or generate_description(lexeme),
             language=data["Language"][lexeme["Language_ID"]],
-            pos=get_link(lexeme, "Part_Of_Speech", "POS")
+            pos=get_link(lexeme, "Part_Of_Speech", "POS"),
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
             new_lexeme.paradigm_x = lexeme["Paradigm_View"]["x"]
@@ -365,7 +365,7 @@ def main(args):
             id=process["ID"],
             name=process["Name"],
             description=process["Description"],
-            language=get_link(process, "Language_ID")
+            language=get_link(process, "Language_ID"),
         )
     for derivation in iter_table("derivations"):
         sstem = get_link(derivation, "Source_ID", "Stem")
@@ -487,7 +487,7 @@ def main(args):
             common.Sentence_files(
                 object=new_ex,
                 id=ex["Media_ID"],
-                name=ex["Media_ID"].replace(".wav", ""),
+                name=ex["Media_ID"],
                 mime_type="audio/wav",
             )
 
