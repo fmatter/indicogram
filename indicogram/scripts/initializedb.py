@@ -428,7 +428,7 @@ def main(args):
             corpus.Text,
             text["ID"],
             id=text["ID"],
-            name=text["Title"],
+            name=text["Name"],
             description=text["Description"],
             text_metadata=text["Metadata"],
         )
