@@ -483,6 +483,13 @@ def main(args):
                     sentence=new_ex, source=source, key=source.id, description=pages
                 )
             )
+        if ex["Media_ID"]:
+            common.Sentence_files(
+                object=new_ex,
+                id=ex["Media_ID"],
+                name=ex["Media_ID"].replace(".wav", ""),
+                mime_type="audio/wav",
+            )
 
     if "ExampleTable" in cldf_tables:
         demo_data.append(
@@ -500,18 +507,6 @@ def main(args):
             #     sf["Form_ID"] + "-" + sf["Parameter_ID"]
             # ],
         )
-
-    for audio in iter_table("MediaTable"):
-        if audio["ID"] in data["Sentence"]:
-            sentence_file = common.Sentence_files(
-                object_pk=data["Sentence"][audio["ID"]].pk,
-                name="%s" % audio["ID"],
-                id="%s" % audio["ID"],
-                mime_type="audio/wav",
-            )
-            DBSession.add(sentence_file)
-            DBSession.flush()
-            DBSession.refresh(sentence_file)
 
     chapters = {}
     for chapter in iter_table("chapters"):
