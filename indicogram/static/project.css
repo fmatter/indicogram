@@ -7,28 +7,37 @@ audio[id*="_player"] {
     height: 1.6ex;
 }
 
-li a.Sentence{
+a.Sentence{
  text-decoration: none;
  display: inline;
  color:  DarkRed;
 }
 
-li a.Wordform{
+a.Wordform{
    color:  midnightblue;
 }
 
-li a.Morph{
+a.Morph{
   color: darkgreen;
 }
 
-li a.Morpheme{
+a.Morpheme{
   color: darkgreen;
 }
 
-li a.Gloss{
+a.Gloss{
   color: Indigo;
 }
 
-li a.POS{
+a.POS{
   color: DarkGray;
+}
+
+a.Stem{
+  color: DarkGoldenRod;
+}
+
+a.Lexeme{
+  color: DarkGoldenRod;
+  font-variant: small-caps;
 }
