@@ -356,7 +356,7 @@ def main(args):
             sslice["ID"],
             form=data["Wordform"][sslice["Wordform_ID"]],
             stem=data["Stem"][sslice["Stem_ID"]],
-            index=[int(sslice["Index"])],
+            index=sslice["Index"],
         )
     for process in iter_table("derivationalprocesses"):
         data.add(
