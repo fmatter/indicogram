@@ -322,16 +322,6 @@ def main(args):
             language=data["Language"][stem["Language_ID"]],
             parts=stem["Morpho_Segments"],
         )
-        stem_glosses = get_link(stem, "Gloss_ID") or []
-        if not isinstance(stem_glosses, list):
-            stem_glosses = [stem_glosses]
-        for stem_gloss in stem_glosses:
-            data.add(
-                morpho.StemGloss,
-                stem["ID"],
-                gloss=stem_gloss,
-                stem=new_stem,
-            )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
     for sslice in iter_table("stemparts"):
