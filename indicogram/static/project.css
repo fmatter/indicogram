@@ -21,6 +21,14 @@ li a.Morph{
   color: darkgreen;
 }
 
-li a.Morphset{
+li a.Morpheme{
   color: darkgreen;
+}
+
+li a.Gloss{
+  color: Indigo;
+}
+
+li a.POS{
+  color: DarkGray;
 }
