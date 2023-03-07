@@ -382,6 +382,7 @@ def main(args):
             cat["ID"],
             id=cat["ID"],
             name=cat["Name"],
+            description=cat["Description"],
             value_order=cat.get("Value_Order", []),
         )
     for val in iter_table("inflectionalvalues"):
@@ -433,7 +434,7 @@ def main(args):
                 )
 
     for spk in iter_table("speakers"):
-        data.add(corpus.Speaker, spk["ID"], id=spk["ID"], name=spk["Abbreviation"])
+        data.add(corpus.Speaker, spk["ID"], id=spk["ID"], name=spk["Name"])
 
     for ex in iter_table("ExampleTable"):
         ex["Analyzed_Word"] = ["" if x is None else x for x in ex["Analyzed_Word"]]

@@ -115,4 +115,10 @@ def main(global_config, **settings):
     config.register_resource(
         "phoneme", models.Phoneme, interfaces.IPhoneme, with_index=True
     )
+
+    config.add_page("description")
+    config.add_page("corpus")
+    config.add_page("morphosyntax")
+    config.add_page("lexicon")
+
     return config.make_wsgi_app()

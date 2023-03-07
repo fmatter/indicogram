@@ -32,6 +32,7 @@ Setup:
 ## Changelog
 
 ### 2023-03-06
+* restructured table navigation
 * more colors
 
 ### 2023-02-23
