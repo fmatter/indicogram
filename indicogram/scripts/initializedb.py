@@ -2,19 +2,19 @@ import csv
 import logging
 import sys
 
+import clld_corpus_plugin.models as corpus
+import clld_document_plugin.models as doc
+import clld_morphology_plugin.models as morpho
 import colorlog
 from clld.cliutil import Data, bibtex2source
 from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
-import clld_corpus_plugin.models as corpus
-import clld_document_plugin.models as doc
-import clld_morphology_plugin.models as morpho
 from clldutils import licenses
 from pycldf import Sources
+from slugify import slugify
 
 import indicogram
-from slugify import slugify
 
 csv.field_size_limit(sys.maxsize)
 
@@ -547,6 +547,22 @@ def main(args):
             name=abbr["Description"],
         )
 
+    for table in cldf_tables:
+        if table == "topics.csv":
+            continue
+        for row in cldf.iter_rows(table):
+            if "References" in row and row["References"]:
+                refs = [
+                    f'<a href="/documents/{ref["Chapter"]}#{ref["ID"]}">{ref["Label"]}</a>'
+                    for ref in row["References"]
+                ]
+                data[table.replace("s.csv", "").capitalize()][
+                    row["ID"]
+                ].markup_description = (
+                    "Discussed in:<br><ul>"
+                    + "\n".join([f"<li>{x}</li>" for x in refs])
+                    + "</ul>"
+                )
     if not dataset.description:
         dataset.description = (
             f"Welcome to your fresh new CLLD grammar! "
