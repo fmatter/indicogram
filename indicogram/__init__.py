@@ -1,5 +1,6 @@
 from clld_corpus_plugin.models import Text
 from clld_document_plugin import decorate_gloss_string
+from clld_document_plugin.models import Document
 from clld_markdown_plugin import comma_and_list
 from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
 from pyramid.config import Configurator
@@ -88,6 +89,10 @@ def main(global_config, **settings):
                 "route": "phoneme",
                 "model": models.Phoneme,
                 "decorate": lambda x: f"/{x}/",
+            },
+            "chapters.csv": {
+                "route": "document",
+                "model": Document,
             },
             POSTable["url"]: {"route": "pos", "model": POS},
             "FormTable": {

@@ -530,16 +530,15 @@ def main(args):
             name=topic["Name"],
             description=topic["Description"],
         )
-        for ref, label, title in topic["References"]:
+        for ref in topic["References"]:
             data.add(
                 doc.TopicDocument,
-                topic["ID"] + slugify(ref),
+                topic["ID"] + slugify(ref["ID"]),
                 topic=new_topic,
-                document=data["Document"]["nouns"],
-                label=title,
-                section=ref,
+                document=data["Document"][ref["Chapter"]],
+                label=ref["Label"],
+                section=ref["ID"],
             )
-
     for abbr in iter_table("abbreviations"):
         data.add(
             common.GlossAbbreviation,
