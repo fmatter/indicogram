@@ -15,14 +15,17 @@ a.Sentence{
 
 a.Wordform{
    color:  midnightblue;
+   font-style: italic;
 }
 
 a.Morph{
   color: darkgreen;
+  font-style: italic;
 }
 
 a.Morpheme{
   color: darkgreen;
+  font-style: italic;
 }
 
 a.Gloss{
@@ -35,6 +38,7 @@ a.POS{
 
 a.Stem{
   color: DarkGoldenRod;
+  font-style: italic;
 }
 
 a.Lexeme{

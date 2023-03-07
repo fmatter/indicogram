@@ -31,6 +31,9 @@ Setup:
 
 ## Changelog
 
+### 2023-03-06
+* more colors
+
 ### 2023-02-23
 * glossing abbreviations
 
