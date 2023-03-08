@@ -10,7 +10,7 @@ from clld_corpus_plugin.models import Text
 from clld_document_plugin import decorate_gloss_string
 from clld_document_plugin.models import Document
 from clld_markdown_plugin import comma_and_list
-from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform
+from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform, Form
 from pyramid.config import Configurator
 
 from indicogram import interfaces, models
@@ -25,6 +25,7 @@ table_dic = {
     WordformTable["url"]: [Wordform, "wordform"],
     LexemeTable["url"]: [Lexeme, "lexeme"],
     MorphTable["url"]: [Morph, "morph"],
+    "FormTable": [Form, "form"]
 }
 
 
@@ -96,13 +97,9 @@ def main(global_config, **settings):
                 "model": Document,
             },
             POSTable["url"]: {"route": "pos", "model": POS},
-            "FormTable": {
-                "route": "wordform",
-                "model": Wordform,
-                "decorate": lambda x: f"*{x}*",
-            },
         },
         "renderer_map": {
+            "FormTable": render_lfts,
             MorphTable["url"]: render_lfts,
             MorphemeTable["url"]: render_lfts,
             WordformTable["url"]: render_lfts,
