@@ -210,7 +210,7 @@ def main(args):
         if wordform["Source"]:
             bibkey, pages = Sources.parse(wordform["Source"][0])
             new_form.source = data["Source"][bibkey]
-        if wordform["Media_ID"]:
+        if "Media_ID" in wordform and wordform["Media_ID"]:
             morpho.Wordform_files(
                 object=new_form,
                 id=wordform["Media_ID"],
@@ -474,7 +474,7 @@ def main(args):
                     sentence=new_ex, source=source, key=source.id, description=pages
                 )
             )
-        if ex["Media_ID"]:
+        if "Media_ID" in ex and ex["Media_ID"]:
             common.Sentence_files(
                 object=new_ex,
                 id=ex["Media_ID"],
