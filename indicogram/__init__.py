@@ -12,7 +12,7 @@ from clld_document_plugin.models import Document
 from clld_markdown_plugin import comma_and_list
 from clld_morphology_plugin.models import POS, Lexeme, Morph, Morpheme, Wordform, Form
 from pyramid.config import Configurator
-
+from clld.web.util.helpers import link
 from indicogram import interfaces, models
 
 
@@ -39,7 +39,11 @@ def render_lfts(req, objid, table, session, **kwargs):
     unit = session.query(model).filter(model.id == objid).first()
     url = req.route_url(route, id=objid, **kwargs)
     with_translation = "no_translation" not in kwargs
+    with_language = "with_language" in kwargs
+    with_source = "with_source" in kwargs
     md_str = f"*[{unit.name}]({url})*"
+    if with_language:
+        md_str = unit.language.name + " " + md_str
     translation = get_kwarg("translation", kwargs)
     if not translation:
         translation = unit.description
@@ -59,6 +63,8 @@ def render_lfts(req, objid, table, session, **kwargs):
                 )
             ]
         md_str += f" ‘{', '.join(meanings)}’"
+    if with_source and unit.source:
+        md_str += f" ({link(req, unit.source)})"
     return md_str
 
 
