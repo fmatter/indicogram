@@ -450,6 +450,8 @@ def main(args):
             language=data["Language"][ex["Language_ID"]],
             comment=ex["Comment"],
         )
+        if "Original_Translation" in ex:
+            new_ex.markup_description = ex["Original_Translation"]
         if "speakers.csv" in cldf_tables:
             data.add(
                 corpus.SpeakerSentence,
