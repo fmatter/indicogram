@@ -15,9 +15,13 @@ from pyramid.config import Configurator
 from clld.web.util.helpers import link
 from indicogram import interfaces, models
 
-
-def get_kwarg(string, kwargs):
-    return kwargs.get(string, [None])[0]
+boolmap = {"False": False, "True": True}
+def get_kwarg(string, kwargs, bool=False, default=False):
+    if not bool:
+        return kwargs.get(string, [None])[0]
+    if string in kwargs:
+        return boolmap[kwargs[string][0]]
+    return default
 
 
 table_dic = {
@@ -38,7 +42,7 @@ def render_lfts(req, objid, table, session, **kwargs):
         )
     unit = session.query(model).filter(model.id == objid).first()
     url = req.route_url(route, id=objid, **kwargs)
-    with_translation = "no_translation" not in kwargs
+    with_translation = get_kwarg("with_translation", kwargs, bool=True, default=True)
     with_language = "with_language" in kwargs
     with_source = "with_source" in kwargs
     md_str = f"*[{unit.name}]({url})*"

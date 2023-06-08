@@ -11,8 +11,11 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
 from clldutils import licenses
+import shutil
 from pycldf import Sources
 from slugify import slugify
+import shutil
+from pathlib import Path
 
 import indicogram
 
@@ -195,6 +198,15 @@ def main(args):
             description=pos["Description"],
             language=data["Language"][pos["Language_ID"]],
         )
+
+    media = {}
+    for med in iter_table("media"):
+        src_path = Path(med["Download_URL"].path)
+        filename = src_path.name
+        target_path = Path("audio") / filename
+        if src_path.is_file() and not target_path.is_file():
+            shutil.copy(src_path, target_path)
+        media[med["ID"]] = filename
 
     for wordform in iter_table("wordforms"):
         new_form = data.add(
@@ -481,6 +493,13 @@ def main(args):
                 object=new_ex,
                 id=ex["Media_ID"],
                 name=ex["Media_ID"],
+                mime_type="audio/wav",
+            )
+        elif ex["ID"] in media:
+            common.Sentence_files(
+                object=new_ex,
+                id=ex["ID"],
+                name=ex["ID"],
                 mime_type="audio/wav",
             )
 
