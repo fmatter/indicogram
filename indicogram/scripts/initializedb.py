@@ -86,6 +86,7 @@ def tag_slug(tag):
         tag_dic[tag] = f"{tagslug}-{suff}"
     return tag_dic[tag]
 
+
 def process_cldf(data, dataset, cldf):
     cldf_tables = list(cldf.components.keys()) + [
         str(x.url) for x in cldf.tables
@@ -145,8 +146,26 @@ def process_cldf(data, dataset, cldf):
         )
         if contributor["Order"]:
             dataset.editors.append(
-            common.Editor(contributor=new_cont, ord=contributor["Order"], primary=True)
+                common.Editor(
+                    contributor=new_cont, ord=contributor["Order"], primary=True
+                )
+            )
+
+    for ctb in iter_table("ContributionTable"):
+        cont = data.add(
+            common.Contribution,
+            ctb["ID"],
+            id=ctb["ID"],
+            name=ctb["Name"],
+            description=ctb["Description"],
         )
+        for contributor in listify(ctb["Contributor"]):
+            data.add(
+                common.ContributionContributor,
+                ctb["ID"],
+                contribution=cont,
+                contributor=data["Contributor"][contributor],
+            )
 
     log.info("Sources")
     for rec in bibtex.Database.from_file(cldf.bibpath):
@@ -199,6 +218,7 @@ def process_cldf(data, dataset, cldf):
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
             pos=get_link(wordform, "Part_Of_Speech", "POS"),
+            contribution=get_link(wordform, "Contribution_ID")
         )
         if wordform["Source"]:
             bibkey, pages = Sources.parse(wordform["Source"][0])
@@ -224,6 +244,7 @@ def process_cldf(data, dataset, cldf):
             name=morpheme["Name"],
             language=data["Language"][morpheme["Language_ID"]],
             description=generate_description(morpheme),
+            contribution=get_link(morpheme, "Contribution_ID")
         )
 
     for morph in iter_table("morphs"):
@@ -234,6 +255,7 @@ def process_cldf(data, dataset, cldf):
             language=data["Language"][morph["Language_ID"]],
             name=morph["Name"],
             description=generate_description(morph),
+            contribution=get_link(morph, "Contribution_ID")
         )
         if morph["Name"].startswith("-"):
             new_morph.morph_type = "suffix"
@@ -280,6 +302,7 @@ def process_cldf(data, dataset, cldf):
             parts=form.get("Morpho_Segments"),
             description=generate_description(form),
             language=data["Language"][form["Language_ID"]],
+            contribution=get_link(form, "Contribution_ID")
         )
 
     for fslice in iter_table("formparts"):
@@ -300,6 +323,7 @@ def process_cldf(data, dataset, cldf):
             description=lexeme["Description"] or generate_description(lexeme),
             language=data["Language"][lexeme["Language_ID"]],
             pos=get_link(lexeme, "Part_Of_Speech", "POS"),
+            contribution=get_link(lexeme, "Contribution_ID")
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
             new_lexeme.paradigm_x = lexeme["Paradigm_View"]["x"]
@@ -314,6 +338,7 @@ def process_cldf(data, dataset, cldf):
             description=generate_description(stem),
             language=data["Language"][stem["Language_ID"]],
             parts=stem["Morpho_Segments"],
+            contribution=get_link(stem, "Contribution_ID")
         )
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
@@ -574,6 +599,8 @@ def process_cldf(data, dataset, cldf):
             "Here's some examples of what you can do with these tools:\n\n"
             + "\n".join(demo_data)
         )
+
+
 def main(args):
     cldf = args.cldf  # passed in via --cldf
     data = Data()
