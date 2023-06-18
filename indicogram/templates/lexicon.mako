@@ -1,5 +1,5 @@
 <%inherit file="app.mako"/>
-<% from clld_morphology_plugin.models import Lexeme, Stem, DerivationalProcess %>
+<% from clld_morphology_plugin.models import Lexeme, Stem, DerivationalProcess, Morph, Morpheme %>
 <% from clld.db.models.common import Source %>
 
 <link rel="stylesheet" href="${req.static_url('clld_document_plugin:static/clld-document.css')}"/>
@@ -23,14 +23,24 @@
 <div class="tabbable">
 
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#lexemes" data-toggle="tab"> Lexemes </a></li>
+        <li class="active"><a href="#morphemes" data-toggle="tab"> Morphemes </a></li>
+        <li><a href="#morphs" data-toggle="tab"> Morphs </a></li>
+        <li><a href="#lexemes" data-toggle="tab"> Lexemes </a></li>
         <li ><a href="#stems" data-toggle="tab"> Stems </a></li>
         <li><a href="#derivation" data-toggle="tab"> Derivation </a></li>
     </ul>
 
     <div class="tab-content" style="overflow: visible;">
 
-        <div id="lexemes" class="tab-pane active">
+        <div id="morphs" class="tab-pane">
+            ${request.get_datatable('morphs', Morph).render()}
+        </div>
+
+        <div id="morphemes" class="tab-pane active">
+            ${request.get_datatable('morphemes', Morpheme).render()}
+        </div>
+
+        <div id="lexemes" class="tab-pane">
             ${request.get_datatable('lexemes', Lexeme).render()}
         </div>
 

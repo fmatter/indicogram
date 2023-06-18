@@ -13,6 +13,7 @@ from clld.lib import bibtex
 from clldutils import licenses
 import shutil
 from pycldf import Sources
+from tqdm import tqdm
 from slugify import slugify
 import shutil
 from pathlib import Path
@@ -85,9 +86,7 @@ def tag_slug(tag):
         tag_dic[tag] = f"{tagslug}-{suff}"
     return tag_dic[tag]
 
-
-def main(args):
-    cldf = args.cldf  # passed in via --cldf
+def process_cldf(data, dataset, cldf):
     cldf_tables = list(cldf.components.keys()) + [
         str(x.url) for x in cldf.tables
     ]  # a list of tables in the dataset
@@ -107,21 +106,17 @@ def main(args):
     ]
 
     def iter_table(tablename):
+        entries = []
         if tablename[0] == tablename[0].lower():
             tablename = f"{tablename}.csv"
         if tablename in cldf_tables:
-            log.info(tablename)
-            for entry in cldf.iter_rows(tablename):
-                yield entry
+            entries = list(cldf.iter_rows(tablename))
+        for entry in tqdm(entries, desc=tablename):
+            yield entry
         # else:
         #     log.warning(f"Table '{tablename}' does not exist")
 
     demo_data = []
-    data = Data()
-    if "http" in cldf.properties.get("dc:identifier", ""):
-        domain = cldf.properties.get("dc:identifier").split("://")[1]
-    else:
-        domain = "example.org/"
 
     def get_link(rec, field, datafield=None):
         if not datafield:
@@ -131,21 +126,6 @@ def main(args):
                 return [data[datafield][x] for x in rec[field]]
             return data[datafield][rec[field]]
         return None
-
-    dataset = data.add(
-        common.Dataset,
-        indicogram.__name__,
-        id=indicogram.__name__,
-        name=cldf.properties.get(
-            "dc:title", "Unnamed dataset"
-        ),  # all the dc:X data should be in your CLDF dataset
-        domain=domain,
-        license=cldf.properties.get("dc:license", None),
-        jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False),
-        publisher_name="",
-        publisher_place="",
-        publisher_url="",
-    )
 
     for contributor in iter_table("contributors"):
         if dataset.contact is None and contributor["Email"] is not None:
@@ -163,7 +143,8 @@ def main(args):
             url=contributor["Url"],
             jsondata=jsondata,
         )
-        dataset.editors.append(
+        if contributor["Order"]:
+            dataset.editors.append(
             common.Editor(contributor=new_cont, ord=contributor["Order"], primary=True)
         )
 
@@ -296,7 +277,7 @@ def main(args):
             form["ID"],
             id=form["ID"],
             name=form["Form"],
-            parts=form["Morpho_Segments"],
+            parts=form.get("Morpho_Segments"),
             description=generate_description(form),
             language=data["Language"][form["Language_ID"]],
         )
@@ -593,6 +574,28 @@ def main(args):
             "Here's some examples of what you can do with these tools:\n\n"
             + "\n".join(demo_data)
         )
+def main(args):
+    cldf = args.cldf  # passed in via --cldf
+    data = Data()
+    if "http" in cldf.properties.get("dc:identifier", ""):
+        domain = cldf.properties.get("dc:identifier").split("://")[1]
+    else:
+        domain = "example.org/"
+    dataset = data.add(
+        common.Dataset,
+        indicogram.__name__,
+        id=indicogram.__name__,
+        name=cldf.properties.get(
+            "dc:title", "Unnamed dataset"
+        ),  # all the dc:X data should be in your CLDF dataset
+        domain=domain,
+        license=cldf.properties.get("dc:license", None),
+        jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False),
+        publisher_name="",
+        publisher_place="",
+        publisher_url="",
+    )
+    process_cldf(data, dataset, cldf)
 
 
 def prime_cache(args):
