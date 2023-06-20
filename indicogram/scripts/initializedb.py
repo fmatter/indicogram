@@ -112,8 +112,9 @@ def process_cldf(data, dataset, cldf):
             tablename = f"{tablename}.csv"
         if tablename in cldf_tables:
             entries = list(cldf.iter_rows(tablename))
-        for entry in tqdm(entries, desc=tablename):
-            yield entry
+        if entries:
+            for entry in tqdm(entries, desc=tablename):
+                yield entry
         # else:
         #     log.warning(f"Table '{tablename}' does not exist")
 
@@ -125,7 +126,7 @@ def process_cldf(data, dataset, cldf):
         if field in rec and rec[field]:
             if isinstance(rec[field], list):
                 return [data[datafield][x] for x in rec[field]]
-            return data[datafield][rec[field]]
+            return data[datafield].get(rec[field])
         return None
 
     for contributor in iter_table("contributors"):
@@ -167,8 +168,7 @@ def process_cldf(data, dataset, cldf):
                 contributor=data["Contributor"][contributor],
             )
 
-    log.info("Sources")
-    for rec in bibtex.Database.from_file(cldf.bibpath):
+    for rec in tqdm(bibtex.Database.from_file(cldf.bibpath), desc="Sources"):
         data.add(common.Source, rec.id, _obj=bibtex2source(rec))
 
     for lang in iter_table("LanguageTable"):
@@ -255,7 +255,8 @@ def process_cldf(data, dataset, cldf):
             language=data["Language"][morph["Language_ID"]],
             name=morph["Name"],
             description=generate_description(morph),
-            contribution=get_link(morph, "Contribution_ID")
+            contribution=get_link(morph, "Contribution_ID"),
+            pos=get_link(morph, "Part_Of_Speech", "POS"),
         )
         if morph["Name"].startswith("-"):
             new_morph.morph_type = "suffix"
