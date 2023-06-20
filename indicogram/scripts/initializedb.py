@@ -129,6 +129,11 @@ def process_cldf(data, dataset, cldf):
             return data[datafield].get(rec[field])
         return None
 
+    def add_source(entity, new_entity):
+        if entity["Source"]:
+            bibkey, pages = Sources.parse(entity["Source"][0])
+            new_entity.source = data["Source"][bibkey]
+
     for contributor in iter_table("contributors"):
         if dataset.contact is None and contributor["Email"] is not None:
             dataset.contact = contributor["Email"]
@@ -220,9 +225,7 @@ def process_cldf(data, dataset, cldf):
             pos=get_link(wordform, "Part_Of_Speech", "POS"),
             contribution=get_link(wordform, "Contribution_ID")
         )
-        if wordform["Source"]:
-            bibkey, pages = Sources.parse(wordform["Source"][0])
-            new_form.source = data["Source"][bibkey]
+        add_source(wordform, new_form)
         if "Media_ID" in wordform and wordform["Media_ID"]:
             morpho.Wordform_files(
                 object=new_form,
@@ -237,7 +240,7 @@ def process_cldf(data, dataset, cldf):
         )
 
     for morpheme in iter_table("morphemes"):
-        data.add(
+        new_morpheme = data.add(
             morpho.Morpheme,
             morpheme["ID"],
             id=morpheme["ID"],
@@ -246,6 +249,7 @@ def process_cldf(data, dataset, cldf):
             description=generate_description(morpheme),
             contribution=get_link(morpheme, "Contribution_ID")
         )
+        add_source(morpheme, new_morpheme)
 
     for morph in iter_table("morphs"):
         new_morph = data.add(
@@ -258,6 +262,7 @@ def process_cldf(data, dataset, cldf):
             contribution=get_link(morph, "Contribution_ID"),
             pos=get_link(morph, "Part_Of_Speech", "POS"),
         )
+        add_source(morph, new_morph)
         if morph["Name"].startswith("-"):
             new_morph.morph_type = "suffix"
         elif morph["Name"].endswith("-"):
@@ -295,7 +300,7 @@ def process_cldf(data, dataset, cldf):
             )
 
     for form in iter_table("forms"):
-        data.add(
+        new_form = data.add(
             morpho.Form,
             form["ID"],
             id=form["ID"],
@@ -305,6 +310,7 @@ def process_cldf(data, dataset, cldf):
             language=data["Language"][form["Language_ID"]],
             contribution=get_link(form, "Contribution_ID")
         )
+        add_source(form, new_form)
 
     for fslice in iter_table("formparts"):
         data.add(
@@ -341,6 +347,7 @@ def process_cldf(data, dataset, cldf):
             parts=stem["Morpho_Segments"],
             contribution=get_link(stem, "Contribution_ID")
         )
+        add_source(stem, new_stem)
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
 
     for sslice in iter_table("stemparts"):
@@ -442,6 +449,7 @@ def process_cldf(data, dataset, cldf):
             description=text["Description"],
             text_metadata=text["Metadata"],
         )
+        add_source(text, new_text)
         for tag in tags:
             if tag not in data["Tag"]:
                 data.add(corpus.Tag, tag, id=tag, name=tag)
