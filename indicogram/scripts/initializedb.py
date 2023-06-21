@@ -467,7 +467,7 @@ def process_cldf(data, dataset, cldf):
         ex["Analyzed_Word"] = ["" if x is None else x for x in ex["Analyzed_Word"]]
         ex["Gloss"] = ["" if x is None else x for x in ex["Gloss"]]
         new_ex = data.add(
-            common.Sentence,
+            corpus.Record,
             ex["ID"],
             id=ex["ID"],
             name=ex["Primary_Text"],
@@ -476,6 +476,7 @@ def process_cldf(data, dataset, cldf):
             gloss="\t".join(ex["Gloss"]),
             language=data["Language"][ex["Language_ID"]],
             comment=ex["Comment"],
+            contribution=get_link(ex, "Contribution_ID")
         )
         if "Original_Translation" in ex:
             new_ex.markup_description = ex["Original_Translation"]
@@ -528,7 +529,7 @@ def process_cldf(data, dataset, cldf):
             corpus.SentencePart,
             sf["ID"],
             form=data["Wordform"][sf["Wordform_ID"]],
-            sentence=data["Sentence"][sf["Example_ID"]],
+            sentence=data["Record"][sf["Example_ID"]],
             index=int(sf["Index"]),
             # form_meaning=data["FormMeaning"][
             #     sf["Form_ID"] + "-" + sf["Parameter_ID"]
