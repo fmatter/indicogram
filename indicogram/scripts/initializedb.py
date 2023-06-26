@@ -206,6 +206,8 @@ def process_cldf(data, dataset, cldf):
 
     media = {}
     for med in iter_table("media"):
+        if med["Download_URL"].scheme == "data":
+            continue
         src_path = Path(med["Download_URL"].path)
         filename = src_path.name
         target_path = Path("audio") / filename
@@ -418,7 +420,7 @@ def process_cldf(data, dataset, cldf):
             id=val["ID"],
             name=val["Name"],
             category=data["InflectionalCategory"][val["Category_ID"]],
-            gloss=data["Gloss"][val["Gloss_ID"]],
+            gloss=get_link(val, "Gloss_ID"),
         )
     for infl in iter_table("inflections"):
         new_infl = data.add(
