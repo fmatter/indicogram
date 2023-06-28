@@ -20,9 +20,10 @@ setup(
     zip_safe=False,
     install_requires=[
         "clld>=9.0.0",
-        "clld_corpus_plugin>=0.0.7",
-        "clld_document_plugin>=0.0.4",
-        "clld_morphology_plugin>=0.0.7",
+        "clld_corpus_plugin>=0.0.8",
+        "clld_document_plugin>=0.0.5",
+        "clld_morphology_plugin>=0.0.10",
+        "clld-markdown-plugin=>0.2.0",
         "waitress>=2.1.2",
         "cldf-ldd"
     ],
