@@ -23,9 +23,9 @@ setup(
         "clld_corpus_plugin>=0.0.8",
         "clld_document_plugin>=0.0.5",
         "clld_morphology_plugin>=0.0.10",
-        "clld-markdown-plugin=>0.2.0",
+        "clld_markdown_plugin>=0.2.0",
         "waitress>=2.1.2",
-        "cldf-ldd"
+        "cldf-ldd",
     ],
     extras_require={
         "dev": ["flake8"],
