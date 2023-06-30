@@ -29,5 +29,5 @@ ${next.body()}
 
 <script src="${req.static_url('clld_document_plugin:static/clld-document.js')}"></script>
 <script>
-number_examples()
+numberExamples()
 </script>
