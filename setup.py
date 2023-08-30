@@ -25,7 +25,8 @@ setup(
         "clld_morphology_plugin>=0.0.10",
         "clld_markdown_plugin>=0.2.0",
         "waitress>=2.1.2",
-        "cldf-ldd"
+        "cldf-ldd",
+        "tqdm"
     ],
     extras_require={
         "dev": ["flake8"],
