@@ -26,7 +26,8 @@ setup(
         "clld_markdown_plugin>=0.2.0",
         "waitress>=2.1.2",
         "cldf-ldd",
-        "tqdm"
+        "tqdm",
+        "python-slugify"
     ],
     extras_require={
         "dev": ["flake8"],
