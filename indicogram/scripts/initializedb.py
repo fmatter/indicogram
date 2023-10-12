@@ -591,7 +591,7 @@ def process_cldf(data, dataset, cldf):
         dataset.description = (
             f"Welcome to your fresh new CLLD grammar! "
             "To replace this text, add a chapter with the ID `landingpage` to your `ChapterTable`. "
-            "If you don't have a `ChapterTable` yet, you can use [pylingdocs](https://pylingdocs.readthedocs.io/) "
+            "If you don't have a `ChapterTable` yet, you can use [pylingdocs](https://fl.mt/pylingdocs) "
             "or [cldfviz](https://github.com/cldf/cldfviz/) and [cldfbench](https://cldfbench.readthedocs.io) to do so. "
             "Here's some examples of what you can do with these tools:\n\n"
             + "\n".join(demo_data)
@@ -601,6 +601,10 @@ def process_cldf(data, dataset, cldf):
 def main(args):
     cldf = args.cldf  # passed in via --cldf
     data = Data()
+    jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False)
+    for o, n in {"dc:abstract": "abstract"}.items():
+        if o in cldf.properties:
+            jsondata[n] = cldf.properties[o]
     if "http" in cldf.properties.get("dc:identifier", ""):
         domain = cldf.properties.get("dc:identifier").split("://")[1]
     else:
@@ -614,7 +618,7 @@ def main(args):
         ),  # all the dc:X data should be in your CLDF dataset
         domain=domain,
         license=cldf.properties.get("dc:license", None),
-        jsondata=get_license_data(cldf.properties.get("dc:license", None), small=False),
+        jsondata=jsondata,
         publisher_name="",
         publisher_place="",
         publisher_url="",
