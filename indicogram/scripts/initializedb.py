@@ -495,7 +495,7 @@ def process_cldf(data, dataset, cldf):
                 ex["ID"],
                 sentence=new_ex,
                 text=data["Text"][ex["Text_ID"]],
-                record_number=ex["Record_Number"],
+                record_number=ex["Sentence_Number"],
                 phrase_number=ex.get("Phrase_Number", None),
             )
         elif len(ex.get("Source", [])) > 0:
