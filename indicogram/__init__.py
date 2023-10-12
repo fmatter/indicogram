@@ -16,6 +16,8 @@ from clld.web.util.helpers import link
 from indicogram import interfaces, models
 
 boolmap = {"False": False, "True": True}
+
+
 def get_kwarg(string, kwargs, bool=False, default=False):
     if not bool:
         return kwargs.get(string, [None])[0]
@@ -29,7 +31,7 @@ table_dic = {
     WordformTable["url"]: [Wordform, "wordform"],
     LexemeTable["url"]: [Lexeme, "lexeme"],
     MorphTable["url"]: [Morph, "morph"],
-    "FormTable": [Form, "form"]
+    "FormTable": [Form, "form"],
 }
 
 

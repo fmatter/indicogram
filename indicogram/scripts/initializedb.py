@@ -15,7 +15,6 @@ import shutil
 from pycldf import Sources
 from tqdm import tqdm
 from slugify import slugify
-import shutil
 from pathlib import Path
 
 import indicogram
@@ -91,20 +90,6 @@ def process_cldf(data, dataset, cldf):
     cldf_tables = list(cldf.components.keys()) + [
         str(x.url) for x in cldf.tables
     ]  # a list of tables in the dataset
-
-    recommended_tables = [
-        x + "Table"
-        for x in [
-            "Language",
-            "Contributor",
-            "Parameter",
-            "Morphset",
-            "Morph",
-            "Form",
-            "Examples",
-            "Chapter",
-        ]
-    ]
 
     def iter_table(tablename):
         entries = []
@@ -225,7 +210,7 @@ def process_cldf(data, dataset, cldf):
             description=generate_description(wordform),
             parts=wordform["Morpho_Segments"],
             pos=get_link(wordform, "Part_Of_Speech", "POS"),
-            contribution=get_link(wordform, "Contribution_ID")
+            contribution=get_link(wordform, "Contribution_ID"),
         )
         add_source(wordform, new_form)
         if "Media_ID" in wordform and wordform["Media_ID"]:
@@ -249,7 +234,7 @@ def process_cldf(data, dataset, cldf):
             name=morpheme["Name"],
             language=data["Language"][morpheme["Language_ID"]],
             description=generate_description(morpheme),
-            contribution=get_link(morpheme, "Contribution_ID")
+            contribution=get_link(morpheme, "Contribution_ID"),
         )
         add_source(morpheme, new_morpheme)
 
@@ -310,7 +295,7 @@ def process_cldf(data, dataset, cldf):
             parts=form.get("Morpho_Segments"),
             description=generate_description(form),
             language=data["Language"][form["Language_ID"]],
-            contribution=get_link(form, "Contribution_ID")
+            contribution=get_link(form, "Contribution_ID"),
         )
         add_source(form, new_form)
 
@@ -332,7 +317,7 @@ def process_cldf(data, dataset, cldf):
             description=lexeme["Description"] or generate_description(lexeme),
             language=data["Language"][lexeme["Language_ID"]],
             pos=get_link(lexeme, "Part_Of_Speech", "POS"),
-            contribution=get_link(lexeme, "Contribution_ID")
+            contribution=get_link(lexeme, "Contribution_ID"),
         )
         if "Paradigm_View" in lexeme and lexeme["Paradigm_View"]:
             new_lexeme.paradigm_x = lexeme["Paradigm_View"]["x"]
@@ -347,7 +332,7 @@ def process_cldf(data, dataset, cldf):
             description=generate_description(stem),
             language=data["Language"][stem["Language_ID"]],
             parts=stem["Morpho_Segments"],
-            contribution=get_link(stem, "Contribution_ID")
+            contribution=get_link(stem, "Contribution_ID"),
         )
         add_source(stem, new_stem)
         new_stem.lexeme = get_link(stem, "Lexeme_ID")
@@ -478,7 +463,7 @@ def process_cldf(data, dataset, cldf):
             gloss="\t".join(ex["Gloss"]),
             language=data["Language"][ex["Language_ID"]],
             comment=ex["Comment"],
-            contribution=get_link(ex, "Contribution_ID")
+            contribution=get_link(ex, "Contribution_ID"),
         )
         if "Original_Translation" in ex:
             new_ex.markup_description = ex["Original_Translation"]
