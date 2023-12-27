@@ -193,12 +193,12 @@ def process_cldf(data, dataset, cldf):
     for med in iter_table("media"):
         if med["Download_URL"].scheme == "data":
             continue
-        src_path = Path(med["Download_URL"].path)
-        filename = src_path.name
-        target_path = Path("audio") / filename
-        if src_path.is_file() and not target_path.is_file():
-            shutil.copy(src_path, target_path)
-        media[med["ID"]] = filename
+        # src_path = Path(med["Download_URL"].path)
+        # filename = src_path.name
+        # target_path = Path("audio") / filename
+        # if src_path.is_file() and not target_path.is_file():
+        #     shutil.copy(src_path, target_path)
+        media[med["ID"]] = med["Download_URL"].unsplit()
 
     for wordform in iter_table("wordforms"):
         new_form = data.add(
@@ -492,6 +492,7 @@ def process_cldf(data, dataset, cldf):
                 )
             )
         if "Media_ID" in ex and ex["Media_ID"]:
+            new_ex.jsondata["audio_url"] = media[ex["Media_ID"]]
             common.Sentence_files(
                 object=new_ex,
                 id=ex["Media_ID"],
