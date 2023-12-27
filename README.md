@@ -17,9 +17,9 @@ The only components provided by the app itself are:
 * a very simple `Phoneme` model
 * some [configuration](indicogram/__init__.py) for `clld-markdown-plugin`
 
-The app, including the default [database initialization script](indicogram/scripts/initializedb.py) is designed to be compatible with CLDF datasets created from [FLEx](https://software.sil.org/fieldworks/) with [cldflex](https://github.com/fmatter/cldflex) and with [pylingdocs](https://pylingdocs.readthedocs.io)-generated markdown.
+The app, including the default [database initialization script](indicogram/scripts/initializedb.py) is designed to be compatible with CLDF datasets created from [FLEx](https://software.sil.org/fieldworks/) with [cldflex](https://github.com/fmatter/cldflex) and with [lingdocs](https://fl.mt/lingdocs)-generated markdown.
 
-There's [a step-by-step tutorial](https://github.com/fmatter/flex-grammar-tutorial) for FLEx > CLDF > pylingdocs > CLLD.
+There's [a step-by-step tutorial](https://fl.mt/digital-grammar-tutorial) for FLEx > CLDF > lingdocs > CLLD.
 
 Setup:
 

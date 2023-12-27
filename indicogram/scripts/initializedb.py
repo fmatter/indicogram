@@ -592,7 +592,7 @@ def process_cldf(data, dataset, cldf):
         dataset.description = (
             f"Welcome to your fresh new CLLD grammar! "
             "To replace this text, add a chapter with the ID `landingpage` to your `ChapterTable`. "
-            "If you don't have a `ChapterTable` yet, you can use [pylingdocs](https://fl.mt/pylingdocs) "
+            "If you don't have a `ChapterTable` yet, you can use [lingdocs](https://fl.mt/lingdocs) "
             "or [cldfviz](https://github.com/cldf/cldfviz/) and [cldfbench](https://cldfbench.readthedocs.io) to do so. "
             "Here's some examples of what you can do with these tools:\n\n"
             + "\n".join(demo_data)
